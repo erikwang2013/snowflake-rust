@@ -1,7 +1,10 @@
 # Copyright (c) 2026 erik <erik@erik.xyz> — https://erik.xyz
 
 [package]
-name = "snowflake-rust"
+# crates.io 包名：`snowflake-rust` 已被 2020 年的他人项目占用（bejens/snowflake），
+# 故以 `snowflake-id-rust` 发布。库名 [lib] 仍是 `snowflake`，代码里
+# `use snowflake::Snowflake` 不受影响；项目/仓库/CLI 仍叫 snowflake-rust。
+name = "snowflake-id-rust"
 version = "1.0.0"
 edition = "2024"
 rust-version = "1.88"

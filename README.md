@@ -151,8 +151,12 @@ snowflake-rust/
 ## 安装
 
 ```bash
-cargo add snowflake-rust
+cargo add snowflake-id-rust
 ```
+
+> crates.io 上 `snowflake-rust` 这个包名已被 2020 年的其他项目占用，因此本包以
+> **`snowflake-id-rust`** 发布。库名仍是 `snowflake`——代码里的
+> `use snowflake::Snowflake;` 与项目名 snowflake-rust 都不受影响。
 
 ## 快速开始
 
@@ -285,7 +289,7 @@ std::thread::spawn(move || {
 
 ```toml
 # Cargo.toml —— 只开你真正在用的那个
-snowflake-rust = { version = "1.0", features = ["axum"] }
+snowflake-id-rust = { version = "1.0", features = ["axum"] }
 ```
 
 ```rust,ignore

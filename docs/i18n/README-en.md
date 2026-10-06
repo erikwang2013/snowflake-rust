@@ -151,8 +151,13 @@ Instance state (`last_timestamp` plus the resolver cursor) lives in memory; stat
 ## Installation
 
 ```bash
-cargo add snowflake-rust
+cargo add snowflake-id-rust
 ```
+
+> The crate name `snowflake-rust` has been taken on crates.io by an unrelated
+> 2020 project, so this package is published as **`snowflake-id-rust`**. The
+> library name is still `snowflake` — `use snowflake::Snowflake;` and the
+> snowflake-rust project name are unaffected.
 
 ## Quick Start
 
@@ -285,7 +290,7 @@ Handlers should not have to pass the generator down the call chain: register a `
 
 ```toml
 # Cargo.toml — enable only the one you actually use
-snowflake-rust = { version = "1.0", features = ["axum"] }
+snowflake-id-rust = { version = "1.0", features = ["axum"] }
 ```
 
 ```rust,ignore
