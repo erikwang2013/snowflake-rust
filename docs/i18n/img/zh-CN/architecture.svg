@@ -1,0 +1,154 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 1240" width="980" height="1240" role="img" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', 'PingFang SC', 'Hiragino Sans', 'Yu Gothic', 'Malgun Gothic', Roboto, 'Noto Sans CJK SC', 'Source Han Sans SC', 'Microsoft YaHei', 'Kohinoor Devanagari', 'Devanagari Sangam MN', 'Nirmala UI', 'Noto Sans Devanagari', 'Bangla MN', 'Bangla Sangam MN', 'Noto Sans Bengali', 'Geeza Pro', 'Noto Sans Arabic', Arial, sans-serif">
+<title>整体架构设计</title>
+<desc>分层依赖：应用层 → 集成层 → 核心层 → 契约与实现层</desc>
+<defs>
+<marker id="mk-0e7490" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto"><path d="M0,0.6 L9.5,5 L0,9.4 z" fill="#0e7490"/></marker>
+<marker id="mk-5b8def" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto"><path d="M0,0.6 L9.5,5 L0,9.4 z" fill="#5b8def"/></marker>
+</defs>
+<rect width="980" height="1240" fill="#ffffff"/>
+<text x="40" y="54" font-size="27.0" fill="#0f1e33" font-weight="700">整体架构设计</text>
+<text x="40" y="82" font-size="13.5" fill="#6b7c96" font-weight="400">分层依赖：应用层 → 集成层 → 核心层 → 契约与实现层</text>
+<line x1="40.0" y1="100.0" x2="940.0" y2="100.0" stroke="#e8eefa" stroke-width="1.5" stroke-linecap="butt"/>
+<rect x="832.0" y="36.0" width="108.0" height="26.0" rx="13" fill="#eef4ff" stroke="#c3d7ff" stroke-width="1.2"/>
+<text x="886.005375" y="53" font-size="11.5" fill="#2563eb" font-weight="600" text-anchor="middle">snowflake-rust</text>
+<rect x="40.0" y="116.0" width="900.0" height="228.0" rx="14" fill="#f8fbff" stroke="#dbe6f5" stroke-width="1.4"/>
+<rect x="58.0" y="103.0" width="67.8" height="26.0" rx="13.0" fill="#2563eb"/><text x="91.9" y="120.32" font-size="12.0" fill="#fff" font-weight="600" text-anchor="middle">应用层</text>
+<rect x="64.0" y="142.0" width="205.0" height="52.0" rx="10" fill="#ffffff" stroke="#c3d7ff" stroke-width="1.5"/>
+<text x="166.5" y="165" font-size="13.0" fill="#0f1e33" font-weight="600" text-anchor="middle">axum 应用</text>
+<text x="166.5" y="183" font-size="11.0" fill="#6b7c96" font-weight="400" text-anchor="middle">Router · State</text>
+<rect x="285.0" y="142.0" width="205.0" height="52.0" rx="10" fill="#ffffff" stroke="#c3d7ff" stroke-width="1.5"/>
+<text x="387.5" y="165" font-size="13.0" fill="#0f1e33" font-weight="600" text-anchor="middle">actix-web 应用</text>
+<text x="387.5" y="183" font-size="11.0" fill="#6b7c96" font-weight="400" text-anchor="middle">App · app_data</text>
+<rect x="506.0" y="142.0" width="205.0" height="52.0" rx="10" fill="#ffffff" stroke="#c3d7ff" stroke-width="1.5"/>
+<text x="608.5" y="165" font-size="13.0" fill="#0f1e33" font-weight="600" text-anchor="middle">rocket 应用</text>
+<text x="608.5" y="183" font-size="11.0" fill="#6b7c96" font-weight="400" text-anchor="middle">Rocket · manage</text>
+<rect x="727.0" y="142.0" width="205.0" height="52.0" rx="10" fill="#ffffff" stroke="#c3d7ff" stroke-width="1.5"/>
+<text x="829.5" y="165" font-size="13.0" fill="#0f1e33" font-weight="600" text-anchor="middle">poem 应用</text>
+<text x="829.5" y="183" font-size="11.0" fill="#6b7c96" font-weight="400" text-anchor="middle">Route · data</text>
+<rect x="64.0" y="206.0" width="205.0" height="52.0" rx="10" fill="#ffffff" stroke="#c3d7ff" stroke-width="1.5"/>
+<text x="166.5" y="229" font-size="13.0" fill="#0f1e33" font-weight="600" text-anchor="middle">salvo 应用</text>
+<text x="166.5" y="247" font-size="11.0" fill="#6b7c96" font-weight="400" text-anchor="middle">Router · hoop</text>
+<rect x="285.0" y="206.0" width="205.0" height="52.0" rx="10" fill="#ffffff" stroke="#c3d7ff" stroke-width="1.5"/>
+<text x="387.5" y="229" font-size="13.0" fill="#0f1e33" font-weight="600" text-anchor="middle">warp 应用</text>
+<text x="387.5" y="247" font-size="11.0" fill="#6b7c96" font-weight="400" text-anchor="middle">Filter 组合子链</text>
+<rect x="506.0" y="206.0" width="205.0" height="52.0" rx="10" fill="#ffffff" stroke="#c3d7ff" stroke-width="1.5"/>
+<text x="608.5" y="229" font-size="13.0" fill="#0f1e33" font-weight="600" text-anchor="middle">bee-rust 应用</text>
+<text x="608.5" y="247" font-size="11.0" fill="#6b7c96" font-weight="400" text-anchor="middle">Router · 复用 axum</text>
+<rect x="727.0" y="206.0" width="205.0" height="52.0" rx="10" fill="#ffffff" stroke="#c3d7ff" stroke-width="1.5"/>
+<text x="829.5" y="229" font-size="13.0" fill="#0f1e33" font-weight="600" text-anchor="middle">e-cat 应用</text>
+<text x="829.5" y="247" font-size="11.0" fill="#6b7c96" font-weight="400" text-anchor="middle">axum + tower</text>
+<rect x="395.5" y="270.0" width="205.0" height="52.0" rx="10" fill="#ffffff" stroke="#c3d7ff" stroke-width="1.5"/>
+<text x="498.0" y="293" font-size="13.0" fill="#0f1e33" font-weight="600" text-anchor="middle">CLI · 任务进程</text>
+<text x="498.0" y="311" font-size="11.0" fill="#6b7c96" font-weight="400" text-anchor="middle">原生 Rust · 无框架</text>
+<path d="M490.0,344.0 L490.0,366.0" fill="none" stroke="#5b8def" stroke-width="2" stroke-linecap="round" marker-end="url(#mk-5b8def)"/>
+<text x="500" y="360" font-size="11.0" fill="#6b7c96" font-weight="400">Guarded::guard() — 从应用状态取到守卫</text>
+<rect x="40.0" y="372.0" width="900.0" height="176.0" rx="14" fill="#f8fbff" stroke="#dbe6f5" stroke-width="1.4"/>
+<rect x="58.0" y="359.0" width="67.8" height="26.0" rx="13.0" fill="#2563eb"/><text x="91.9" y="376.32" font-size="12.0" fill="#fff" font-weight="600" text-anchor="middle">集成层</text>
+<rect x="64.0" y="398.0" width="205.0" height="64.0" rx="10" fill="#ffffff" stroke="#c3d7ff" stroke-width="1.5"/>
+<text x="78.0" y="419" font-size="12.5" fill="#2563eb" font-weight="700">axum</text>
+<text x="78.0" y="437" font-size="10.5" fill="#3d4d66" font-weight="400">FromRequestParts 提取器</text>
+<text x="78.0" y="453" font-size="10.5" fill="#6b7c96" font-weight="400">.with_state(state)</text>
+<rect x="285.0" y="398.0" width="205.0" height="64.0" rx="10" fill="#ffffff" stroke="#c3d7ff" stroke-width="1.5"/>
+<text x="299.0" y="419" font-size="12.5" fill="#2563eb" font-weight="700">actix-web</text>
+<text x="299.0" y="437" font-size="10.5" fill="#3d4d66" font-weight="400">FromRequest</text>
+<text x="299.0" y="453" font-size="10.5" fill="#6b7c96" font-weight="400">Data&lt;Guard&gt; · app_data</text>
+<rect x="506.0" y="398.0" width="205.0" height="64.0" rx="10" fill="#ffffff" stroke="#c3d7ff" stroke-width="1.5"/>
+<text x="520.0" y="419" font-size="12.5" fill="#2563eb" font-weight="700">rocket</text>
+<text x="520.0" y="437" font-size="10.5" fill="#3d4d66" font-weight="400">请求守卫 FromRequest</text>
+<text x="520.0" y="453" font-size="10.5" fill="#6b7c96" font-weight="400">.manage(guard)</text>
+<rect x="727.0" y="398.0" width="205.0" height="64.0" rx="10" fill="#ffffff" stroke="#c3d7ff" stroke-width="1.5"/>
+<text x="741.0" y="419" font-size="12.5" fill="#2563eb" font-weight="700">poem</text>
+<text x="741.0" y="437" font-size="10.5" fill="#3d4d66" font-weight="400">FromRequest</text>
+<text x="741.0" y="453" font-size="10.5" fill="#6b7c96" font-weight="400">.data(guard)</text>
+<rect x="64.0" y="462.0" width="205.0" height="64.0" rx="10" fill="#ffffff" stroke="#c3d7ff" stroke-width="1.5"/>
+<text x="78.0" y="483" font-size="12.5" fill="#2563eb" font-weight="700">salvo</text>
+<text x="78.0" y="501" font-size="10.5" fill="#3d4d66" font-weight="400">Extractible</text>
+<text x="78.0" y="517" font-size="10.5" fill="#6b7c96" font-weight="400">affix_state::inject</text>
+<rect x="285.0" y="462.0" width="205.0" height="64.0" rx="10" fill="#ffffff" stroke="#c3d7ff" stroke-width="1.5"/>
+<text x="299.0" y="483" font-size="12.5" fill="#2563eb" font-weight="700">warp</text>
+<text x="299.0" y="501" font-size="10.5" fill="#3d4d66" font-weight="400">with_guard 组合子</text>
+<text x="299.0" y="517" font-size="10.5" fill="#6b7c96" font-weight="400">闭包捕获守卫</text>
+<rect x="506.0" y="462.0" width="205.0" height="64.0" rx="10" fill="#ffffff" stroke="#c3d7ff" stroke-width="1.5"/>
+<text x="520.0" y="483" font-size="12.5" fill="#2563eb" font-weight="700">bee-rust</text>
+<text x="520.0" y="501" font-size="10.5" fill="#3d4d66" font-weight="400">复用 axum 提取器</text>
+<text x="520.0" y="517" font-size="10.5" fill="#6b7c96" font-weight="400">状态走 axum State</text>
+<rect x="727.0" y="462.0" width="205.0" height="64.0" rx="10" fill="#ffffff" stroke="#c3d7ff" stroke-width="1.5"/>
+<text x="741.0" y="483" font-size="12.5" fill="#2563eb" font-weight="700">e-cat</text>
+<text x="741.0" y="501" font-size="10.5" fill="#3d4d66" font-weight="400">tower Layer / Service</text>
+<text x="741.0" y="517" font-size="10.5" fill="#6b7c96" font-weight="400">Extension&lt;Guard&gt;</text>
+<path d="M490.0,548.0 L490.0,570.0" fill="none" stroke="#5b8def" stroke-width="2" stroke-linecap="round" marker-end="url(#mk-5b8def)"/>
+<text x="500" y="564" font-size="11.0" fill="#6b7c96" font-weight="400" font-family="'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, 'Courier New', monospace">guard.id() / parse_id()</text>
+<rect x="40.0" y="576.0" width="900.0" height="192.0" rx="14" fill="#f3f8ff" stroke="#dbe6f5" stroke-width="1.4"/>
+<rect x="58.0" y="563.0" width="67.8" height="26.0" rx="13.0" fill="#2563eb"/><text x="91.9" y="580.32" font-size="12.0" fill="#fff" font-weight="600" text-anchor="middle">核心层</text>
+<text x="64" y="606" font-size="12.5" fill="#0f1e33" font-weight="700">一次 id() 要经过的全部东西</text>
+<rect x="64.0" y="620.0" width="273.3" height="58.0" rx="10" fill="#ffffff" stroke="#c3d7ff" stroke-width="1.5"/>
+<text x="78.0" y="645" font-size="12.5" fill="#0f1e33" font-weight="600">Snowflake</text>
+<text x="78.0" y="665" font-size="10.5" fill="#6b7c96" font-weight="400">唯一有状态类型 · id() 需要 &amp;mut self</text>
+<rect x="353.3" y="620.0" width="273.3" height="58.0" rx="10" fill="#ffffff" stroke="#c3d7ff" stroke-width="1.5"/>
+<text x="367.3333333333333" y="645" font-size="12.5" fill="#0f1e33" font-weight="600">SnowflakeBuilder</text>
+<text x="367.3333333333333" y="665" font-size="10.5" fill="#6b7c96" font-weight="400">配置校验 · 位运算预计算</text>
+<rect x="642.7" y="620.0" width="273.3" height="58.0" rx="10" fill="#ffffff" stroke="#c3d7ff" stroke-width="1.5"/>
+<text x="656.6666666666666" y="645" font-size="12.5" fill="#0f1e33" font-weight="600">Shared · guard::Guard</text>
+<text x="656.6666666666666" y="665" font-size="10.5" fill="#6b7c96" font-weight="400">Arc&lt;Mutex&lt;…&gt;&gt; 共享壳（同一个类型）</text>
+<rect x="64.0" y="694.0" width="273.3" height="58.0" rx="10" fill="#ffffff" stroke="#c3d7ff" stroke-width="1.5"/>
+<text x="78.0" y="719" font-size="12.5" fill="#0f1e33" font-weight="600">ParsedId 反解</text>
+<text x="78.0" y="739" font-size="10.5" fill="#6b7c96" font-weight="400">UTC datetime · 零依赖格式化</text>
+<rect x="353.3" y="694.0" width="273.3" height="58.0" rx="10" fill="#ffffff" stroke="#c3d7ff" stroke-width="1.5"/>
+<text x="367.3333333333333" y="719" font-size="12.5" fill="#0f1e33" font-weight="600">SNOWFLAKE_* 配置</text>
+<text x="367.3333333333333" y="739" font-size="10.5" fill="#6b7c96" font-weight="400">环境变量 · 与 PHP 适配器同名</text>
+<rect x="642.7" y="694.0" width="273.3" height="58.0" rx="10" fill="#ffffff" stroke="#c3d7ff" stroke-width="1.5"/>
+<text x="656.6666666666666" y="719" font-size="12.5" fill="#0f1e33" font-weight="600">pet 雪花精灵</text>
+<text x="656.6666666666666" y="739" font-size="10.5" fill="#6b7c96" font-weight="400">NAME · TAGLINE · ASCII · SVG</text>
+<path d="M490.0,768.0 L490.0,790.0" fill="none" stroke="#5b8def" stroke-width="2" stroke-linecap="round" marker-end="url(#mk-5b8def)"/>
+<text x="500" y="784" font-size="11.0" fill="#6b7c96" font-weight="400">每个毫秒委托一次序列号分配</text>
+<rect x="40.0" y="796.0" width="900.0" height="180.0" rx="14" fill="#f6fdfe" stroke="#dbe6f5" stroke-width="1.4"/>
+<rect x="58.0" y="783.0" width="105.6" height="26.0" rx="13.0" fill="#0e7490"/><text x="110.80000000000001" y="800.32" font-size="12.0" fill="#fff" font-weight="600" text-anchor="middle">契约与实现层</text>
+<rect x="64.0" y="820.0" width="300.0" height="140.0" rx="10" fill="#ffffff" stroke="#a9dcea" stroke-width="1.5"/>
+<text x="80" y="846" font-size="13.0" fill="#0e7490" font-weight="700" font-family="'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, 'Courier New', monospace">SequenceResolver</text>
+<text x="80" y="866" font-size="10.5" fill="#6b7c96" font-weight="400">扩展点 · 由下方实现提供</text>
+<text x="80" y="890" font-size="10.5" fill="#3d4d66" font-weight="400" font-family="'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, 'Courier New', monospace">fn next(&amp;mut self,</text>
+<text x="80" y="906" font-size="10.5" fill="#3d4d66" font-weight="400" font-family="'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, 'Courier New', monospace">    timestamp_ms: i64,</text>
+<text x="80" y="922" font-size="10.5" fill="#3d4d66" font-weight="400" font-family="'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, 'Courier New', monospace">    max_sequence: i64,</text>
+<text x="80" y="938" font-size="10.5" fill="#3d4d66" font-weight="400" font-family="'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, 'Courier New', monospace">) -&gt; Result&lt;Option&lt;i64&gt;&gt;</text>
+<rect x="400.0" y="820.0" width="540.0" height="32.0" rx="8" fill="#ffffff" stroke="#a9dcea" stroke-width="1.5"/>
+<path d="M400.0,836.0 L368.0,836.0" fill="none" stroke="#0e7490" stroke-width="1.8" stroke-linecap="round" marker-end="url(#mk-0e7490)"/>
+<text x="414" y="841" font-size="11.5" fill="#3d4d66" text-anchor="start"><tspan fill="#0e7490" font-weight="700">SequentialSequenceResolver</tspan><tspan fill="#6b7c96" font-weight="400"> · 每毫秒从 0 递增（默认）</tspan></text>
+<rect x="400.0" y="856.0" width="540.0" height="32.0" rx="8" fill="#ffffff" stroke="#a9dcea" stroke-width="1.5"/>
+<path d="M400.0,872.0 L368.0,872.0" fill="none" stroke="#0e7490" stroke-width="1.8" stroke-linecap="round" marker-end="url(#mk-0e7490)"/>
+<text x="414" y="877" font-size="11.5" fill="#3d4d66" text-anchor="start"><tspan fill="#0e7490" font-weight="700">RandomSequenceResolver</tspan><tspan fill="#6b7c96" font-weight="400"> · splitmix64 随机起点后递增</tspan></text>
+<rect x="400.0" y="892.0" width="540.0" height="32.0" rx="8" fill="#ffffff" stroke="#a9dcea" stroke-width="1.5"/>
+<path d="M400.0,908.0 L368.0,908.0" fill="none" stroke="#0e7490" stroke-width="1.8" stroke-linecap="round" marker-end="url(#mk-0e7490)"/>
+<text x="414" y="913" font-size="11.5" fill="#3d4d66" text-anchor="start"><tspan fill="#0e7490" font-weight="700">RedisSequenceResolver</tspan><tspan fill="#6b7c96" font-weight="400"> · 跨进程共享计数器</tspan></text>
+<rect x="400.0" y="928.0" width="540.0" height="32.0" rx="8" fill="#ffffff" stroke="#a9dcea" stroke-width="1.5"/>
+<path d="M400.0,944.0 L368.0,944.0" fill="none" stroke="#0e7490" stroke-width="1.8" stroke-linecap="round" marker-end="url(#mk-0e7490)"/>
+<text x="414" y="949" font-size="11.5" fill="#3d4d66" text-anchor="start"><tspan fill="#0e7490" font-weight="700">你的自定义策略</tspan><tspan fill="#6b7c96" font-weight="400"> · impl SequenceResolver</tspan></text>
+<text x="356" y="876" font-size="10.0" fill="#93a3b8" font-weight="600" text-anchor="end">impl</text>
+<rect x="40.0" y="1004.0" width="900.0" height="150.0" rx="14" fill="#fbfcfe" stroke="#dbe6f5" stroke-width="1.4"/>
+<rect x="58.0" y="991.0" width="93.0" height="26.0" rx="13.0" fill="#475569"/><text x="104.5" y="1008.32" font-size="12.0" fill="#fff" font-weight="600" text-anchor="middle">横切关注点</text>
+<text x="64" y="1036" font-size="12.0" fill="#0f1e33" font-weight="700">Error 枚举 — 8 个变体，一一对应 PHP 异常体系</text>
+<rect x="64.0" y="1048.0" width="73.2" height="22.0" rx="11" fill="#fdeeee"/>
+<text x="100.578" y="1063" font-size="10.5" fill="#dc2626" font-weight="600" text-anchor="middle">ClockDrift</text>
+<rect x="145.2" y="1048.0" width="113.8" height="22.0" rx="11" fill="#fff6e6"/>
+<text x="202.075125" y="1063" font-size="10.5" fill="#b45309" font-weight="600" text-anchor="middle">ClockBeforeEpoch</text>
+<rect x="267.0" y="1048.0" width="121.3" height="22.0" rx="11" fill="#fff6e6"/>
+<text x="327.66187499999995" y="1063" font-size="10.5" fill="#b45309" font-weight="600" text-anchor="middle">TimestampOverflow</text>
+<rect x="396.3" y="1048.0" width="104.0" height="22.0" rx="11" fill="#fff6e6"/>
+<text x="448.3424999999999" y="1063" font-size="10.5" fill="#b45309" font-weight="600" text-anchor="middle">InvalidWorkerId</text>
+<rect x="64.0" y="1074.0" width="120.1" height="22.0" rx="11" fill="#fff6e6"/>
+<text x="124.06125" y="1089" font-size="10.5" fill="#b45309" font-weight="600" text-anchor="middle">InvalidDatacenterId</text>
+<rect x="192.1" y="1074.0" width="87.4" height="22.0" rx="11" fill="#f4f7fb"/>
+<text x="235.811625" y="1089" font-size="10.5" fill="#475569" font-weight="600" text-anchor="middle">InvalidConfig</text>
+<rect x="287.5" y="1074.0" width="128.1" height="22.0" rx="11" fill="#f4f7fb"/>
+<text x="351.53099999999995" y="1089" font-size="10.5" fill="#475569" font-weight="600" text-anchor="middle">SequenceUnavailable</text>
+<rect x="423.6" y="1074.0" width="63.9" height="22.0" rx="11" fill="#fdeeee"/>
+<text x="455.50874999999996" y="1089" font-size="10.5" fill="#dc2626" font-weight="600" text-anchor="middle">Backend</text>
+<line x1="608.0" y1="1028.0" x2="608.0" y2="1134.0" stroke="#dbe6f5" stroke-width="1.5" stroke-linecap="butt"/>
+<text x="632" y="1036" font-size="12.0" fill="#0f1e33" font-weight="700">配置与装配</text>
+<text x="632" y="1058" font-size="10.0" fill="#3d4d66" font-weight="400">SNOWFLAKE_* 环境变量与 PHP 适配器同名，同一份</text>
+<text x="632" y="1073" font-size="10.0" fill="#3d4d66" font-weight="400">.env 两边可用</text>
+<text x="632" y="1088" font-size="10.0" fill="#3d4d66" font-weight="400">构建器默认值与 PHP 构造函数一致：worker 0 ·</text>
+<text x="632" y="1103" font-size="10.0" fill="#3d4d66" font-weight="400">datacenter 0 · epoch 2024-01-01</text>
+<text x="632" y="1118" font-size="10.0" fill="#3d4d66" font-weight="400">守卫未注册 = 装配错误：各框架翻译成 500，并点名检查</text>
+<text x="632" y="1133" font-size="10.0" fill="#3d4d66" font-weight="400">装配步骤</text>
+<text x="40" y="1222" font-size="11.5" fill="#93a3b8" font-weight="400">© 2026 erik — https://erik.xyz</text><text x="940" y="1222" font-size="11.5" fill="#93a3b8" font-weight="600" text-anchor="end">snowflake-rust</text>
+</svg>

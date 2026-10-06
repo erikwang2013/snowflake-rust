@@ -1,0 +1,19 @@
+# Ruflo / agent 运行时数据 —— 与 crate 无关，不进版本库
+.env
+.env.local
+.env.*.local
+.claude/
+.claude-flow/
+.swarm/
+.agents/
+.codex/
+.superpowers
+.mcp.json
+AGENTS.md
+skills-lock.json
+
+# Rust build artifacts
+/target
+
+# 本地跑 agent 工具留下的向量库，与 crate 无关
+/ruvector.db

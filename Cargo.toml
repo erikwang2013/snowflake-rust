@@ -1,0 +1,97 @@
+# Copyright (c) 2026 erik <erik@erik.xyz> — https://erik.xyz
+
+[package]
+name = "snowflake-rust"
+version = "1.0.0"
+edition = "2024"
+rust-version = "1.88"
+description = "基于 Twitter Snowflake 算法的分布式唯一 ID 生成器：64 位、k-ordered、全局唯一，Rust 移植自 PHP 包 erikwang2013/snowflake-php，纯 std 零依赖"
+license = "MIT"
+repository = "https://github.com/erikwang2013/snowflake-rust"
+authors = ["erik <erik@erik.xyz>"]
+keywords = ["snowflake", "distributed", "id-generator", "unique-id", "twitter-snowflake"]
+categories = ["algorithms", "concurrency"]
+readme = "README.md"
+
+# 随包只发「读代码 / 用库」要用的东西。docs/pet.svg 绝不能排 ——
+# src/pet.rs 用 include_str! 内联它，排掉就编译不过（cargo package 会当场报错，不会静默漏发）。
+exclude = [
+    "CLAUDE.md",   # 仓库的 agent 配置，与使用者无关
+    "AGENTS.md",
+    "ruvector.db",
+    ".swarm",
+    ".claude-flow",
+    ".agents",
+    ".codex",
+    ".mcp.json",
+]
+
+[lib]
+name = "snowflake"
+
+[[bin]]
+name = "snowflake-rust"
+path = "src/bin/snowflake.rs"
+
+[dependencies]
+# 核心零依赖 —— 纯 std（对应 PHP 版的「纯 PHP，零依赖」）：
+# 随机策略用内部 splitmix64，datetime 用 Hinnant civil-from-days，
+# 错误手写 Display，Redis 客户端以 trait 注入。下面全是框架集成的 opt-in 依赖，
+# 默认构建一个都不拉。
+
+# ── 框架集成（全部 opt-in）────────────────────────────────────────────────
+# 一律保留各框架的默认 feature：适配层要用的是它们的提取器/守卫核心，
+# 那几块常常挂在默认 feature 上。反正这些依赖只在用户主动开启对应 feature
+# 时才进图，且用户自己的框架依赖本来就会把默认 feature 拉进来（Cargo 取并集），
+# 在这里关掉除了让 `cargo check --features <那一个>` 编译不过之外没有收益。
+axum = { version = "0.8", optional = true }
+actix-web = { version = "4", optional = true }
+rocket = { version = "0.5", optional = true }
+poem = { version = "3", optional = true }
+salvo = { version = "1", optional = true }
+warp = { version = "0.4", optional = true }
+# bee-rust 的路由/上下文层
+bee_router = { version = "1", optional = true, default-features = false }
+# e-cat 的中间件层（其 feature 只有 cors / redis，默认不额外拉东西）
+ecat-middleware = { version = "4", optional = true, default-features = false }
+# e-cat 的守卫写成 tower Layer/Service，这两个 crate 提供那两个 trait 与 Request 类型
+tower = { version = "0.5", optional = true }
+http = { version = "1", optional = true }
+
+[features]
+default = []
+
+# ── 框架集成 ────────────────────────────────────────────────────────────────
+# 每个都是 opt-in：默认构建一个框架都不拉。它们做的事都一样 —— 把 Guard
+# （src/guard.rs，框架无关）按各自框架的惯例注入请求上下文，仅此而已。
+#
+# 注意 Cargo 的 feature 是**并集**：同一个二进制里同时开两个框架特性时，
+# 两个都会进依赖图。生产构建只开你真正在用的那个。
+axum = ["dep:axum"]
+actix-web = ["dep:actix-web"]
+rocket = ["dep:rocket"]
+poem = ["dep:poem"]
+salvo = ["dep:salvo"]
+warp = ["dep:warp"]
+# bee-rust 的路由层（bee_router）直接吃 axum handler，状态也走 axum 的 State，
+# 所以 axum 适配层在这里原样可用，顺带把它带上。
+bee-rust = ["axum", "dep:bee_router"]
+# e-cat 同样是 axum + tower 的组合：HTTP 传输层是 axum，中间件是 tower Layer。
+# 它的 Guard 形态是「往请求扩展里塞东西」，需要 tower 与 http 两个 trait 来源；
+# 带上 axum 是因为 e-cat 应用里的处理器就是 axum handler，Guard 的
+# FromRequestParts 提取器（本 crate 的 axum 适配层）在那里直接可用。
+ecat = ["axum", "dep:ecat-middleware", "dep:tower", "dep:http"]
+
+[dev-dependencies]
+# 只给框架适配层的测试用（各自 feature 打开时才编译那些测试）。
+# 这些都是 dev-dependencies，不会进使用者的依赖图。
+tokio = { version = "1", features = ["macros", "rt"] }
+tower = { version = "0.5", features = ["util"] }
+# poem 的 TestClient 与 warp::test 都挂在各自 crate 的 `test` feature 后面；
+# 这里是测试期打开（dev 构建取 feature 并集），用户构建不受影响。
+poem = { version = "3", features = ["test"] }
+warp = { version = "0.4", features = ["test"] }
+
+[profile.release]
+lto = true
+codegen-units = 1
