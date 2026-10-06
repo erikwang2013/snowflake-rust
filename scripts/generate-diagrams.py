@@ -243,13 +243,38 @@ def svg(w, h, body, title, desc):
             f'{body}\n{foot}\n</svg>\n')
 
 
+def mini_snowflake(cx, cy, r, color=BLUE, sw=1.6):
+    """项目宠物“雪花精灵”的迷你版：六分支 + 雪核，用于徽章图标位。
+
+    取自 pet.svg 的同一几何：六条主臂、每臂两片小叉、中心雪核。
+    """
+    out = [f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="{r * 0.24:.1f}" fill="{color}"/>']
+    for i in range(6):
+        out.append(
+            f'<g transform="rotate({i * 60} {cx:.1f} {cy:.1f})">'
+            f'<line x1="{cx + r * 0.32:.1f}" y1="{cy:.1f}" x2="{cx + r:.1f}" y2="{cy:.1f}" '
+            f'stroke="{color}" stroke-width="{sw}" stroke-linecap="round"/>'
+            f'<line x1="{cx + r * 0.62:.1f}" y1="{cy:.1f}" '
+            f'x2="{cx + r * 0.88:.1f}" y2="{cy - r * 0.25:.1f}" '
+            f'stroke="{color}" stroke-width="{sw * 0.75:.2f}" stroke-linecap="round"/>'
+            f'<line x1="{cx + r * 0.62:.1f}" y1="{cy:.1f}" '
+            f'x2="{cx + r * 0.88:.1f}" y2="{cy + r * 0.25:.1f}" '
+            f'stroke="{color}" stroke-width="{sw * 0.75:.2f}" stroke-linecap="round"/>'
+            f'</g>')
+    return "".join(out)
+
+
 def header(w, title, sub, badge=BADGE):
     out = [text(40, 54, title, fit(title, 27, w - 300, "700"), INK, "700"),
            text(40, 82, sub, fit(sub, 13.5, w - 300), MUTED),
            line(40, 100, w - 40, 100, RULE, 1.5, cap="butt")]
-    bw = tw(badge, 11.5, "600") + 26
-    out.append(rect(w - 40 - bw, 36, bw, 26, BLUE_T, BLUE_B, 13, 1.2))
-    out.append(text(w - 40 - bw / 2, 53, badge, 11.5, BLUE, "600", "middle"))
+    # 徽章图标位放项目宠物（迷你雪花精灵），文字跟在右侧。
+    twid = tw(badge, 11.5, "600")
+    bw = twid + 42
+    bx = w - 40 - bw
+    out.append(rect(bx, 36, bw, 26, BLUE_T, BLUE_B, 13, 1.2))
+    out.append(mini_snowflake(bx + 15, 49, 8))
+    out.append(text(bx + 26 + twid / 2, 53, badge, 11.5, BLUE, "600", "middle"))
     return "\n".join(out)
 
 

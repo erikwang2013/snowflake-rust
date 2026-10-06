@@ -61,6 +61,8 @@ println!("{}", pet::ASCII);
 
 Four constants are public — `pet::NAME` / `pet::TAGLINE` / `pet::ASCII` / `pet::SVG` — shared by the README, the CLI banner, and downstream admin panels.
 
+The mascot also fills every **icon slot** in the code: rustdoc's crate logo and the browser-tab favicon both point at it (via `#![doc(html_logo_url / html_favicon_url)]` in `src/lib.rs`), so the snowflake is what you see on the docs.rs page and in the tab; the badge in the top-right corner of all four diagrams above is its miniature. Wherever there is an icon, it is the mascot.
+
 `docs/pet.svg` must **not** go into Cargo's `exclude` — `include_str!` reads it at compile time, and excluding it fails the build outright (`cargo package` reports an error rather than silently shipping a broken crate).
 
 The CLI ships with the mascot too: running `snowflake-rust` with no arguments prints it and generates an ID.
@@ -290,7 +292,7 @@ Handlers should not have to pass the generator down the call chain: register a `
 
 ```toml
 # Cargo.toml — enable only the one you actually use
-snowflake-id-rust = { version = "1.0", features = ["axum"] }
+snowflake-id-rust = { version = "1.1", features = ["axum"] }
 ```
 
 ```rust,ignore

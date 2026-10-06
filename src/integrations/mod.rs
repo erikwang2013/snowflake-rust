@@ -1,6 +1,6 @@
 // Copyright (c) 2026 erik <erik@erik.xyz> — https://erik.xyz
 
-//! 框架集成：把 [`Guard`](crate::guard::Guard) 按各框架的惯例交给处理器。
+//! 框架集成：把 [`Guard`] 按各框架的惯例交给处理器。
 //!
 //! 每个框架一个 feature，全部 opt-in，默认构建一个都不拉。
 //!

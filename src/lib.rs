@@ -75,6 +75,12 @@
 //!
 //! 全部失败收敛为 [`Error`] 一枚枚举，与 PHP 版异常体系一一对应（见 [`error`]）。
 
+// 项目宠物就是代码里的图标：docs.rs 文档页的 crate 图标与浏览器标签页 favicon
+// 都指向 docs/pet.svg（与 pet::SVG 是同一份文件）。
+#![doc(
+    html_logo_url = "https://raw.githubusercontent.com/erikwang2013/snowflake-rust/main/docs/pet.svg",
+    html_favicon_url = "https://raw.githubusercontent.com/erikwang2013/snowflake-rust/main/docs/pet.svg"
+)]
 #![forbid(unsafe_code)]
 
 pub mod config;

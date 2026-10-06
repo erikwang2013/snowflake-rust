@@ -61,6 +61,8 @@ println!("{}", pet::ASCII);
 
 `pet::NAME` / `pet::TAGLINE` / `pet::ASCII` / `pet::SVG` 四个常量对外公开，README、CLI banner、下游管理界面共用同一份。
 
+宠物还占据代码里所有的**图标位**：`rustdoc` 的 crate 图标与浏览器标签页 favicon 都指向它（`src/lib.rs` 的 `#![doc(html_logo_url / html_favicon_url)]`），docs.rs 页面上、标签页里看到的都是这片雪花；本文档中的四张设计图，右上角徽章里也是它的迷你版。有图标的地方，就是它。
+
 `docs/pet.svg` **不能**进 Cargo 的 `exclude` —— `include_str!` 在编译期读它，排掉就当场编译失败（`cargo package` 会直接报错，不会静默漏发）。
 
 CLI 自带宠物：不带参数运行 `snowflake-rust` 会打印它并发一个 ID。
@@ -289,7 +291,7 @@ std::thread::spawn(move || {
 
 ```toml
 # Cargo.toml —— 只开你真正在用的那个
-snowflake-id-rust = { version = "1.0", features = ["axum"] }
+snowflake-id-rust = { version = "1.1", features = ["axum"] }
 ```
 
 ```rust,ignore

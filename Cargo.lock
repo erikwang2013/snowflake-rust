@@ -3471,7 +3471,7 @@ checksum = "f9395f0f0eee849a9b707b2f06bb92a6a422090e2123bb2ef8e87a0e61892a8e"
 
 [[package]]
 name = "snowflake-id-rust"
-version = "1.0.0"
+version = "1.1.0"
 dependencies = [
  "actix-web",
  "axum 0.8.9",

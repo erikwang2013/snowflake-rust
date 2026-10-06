@@ -5,7 +5,7 @@
 # 故以 `snowflake-id-rust` 发布。库名 [lib] 仍是 `snowflake`，代码里
 # `use snowflake::Snowflake` 不受影响；项目/仓库/CLI 仍叫 snowflake-rust。
 name = "snowflake-id-rust"
-version = "1.0.0"
+version = "1.1.0"
 edition = "2024"
 rust-version = "1.88"
 description = "基于 Twitter Snowflake 算法的分布式唯一 ID 生成器：64 位、k-ordered、全局唯一，Rust 移植自 PHP 包 erikwang2013/snowflake-php，纯 std 零依赖"
