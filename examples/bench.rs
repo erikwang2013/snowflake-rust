@@ -20,7 +20,9 @@ const ROUNDS: usize = 5;
 
 fn main() {
     if cfg!(debug_assertions) {
-        eprintln!("⚠ 这是 debug 构建，数字没有意义 —— 请用 `cargo run --release --example bench`\n");
+        eprintln!(
+            "⚠ 这是 debug 构建，数字没有意义 —— 请用 `cargo run --release --example bench`\n"
+        );
     }
 
     println!("迭代 {ITERATIONS} 次 × {ROUNDS} 轮，取最优\n");
@@ -29,24 +31,36 @@ fn main() {
         "操作", "ops/sec", "ns/op", "波动"
     );
 
-    report("SystemTime::now() —— 基线", rounds(|| {
-        black_box(SystemTime::now());
-    }));
+    report(
+        "SystemTime::now() —— 基线",
+        rounds(|| {
+            black_box(SystemTime::now());
+        }),
+    );
 
-    report("SnowflakeBuilder::build()", rounds(|| {
-        black_box(SnowflakeBuilder::new().build().unwrap());
-    }));
+    report(
+        "SnowflakeBuilder::build()",
+        rounds(|| {
+            black_box(SnowflakeBuilder::new().build().unwrap());
+        }),
+    );
 
     let mut snowflake = Snowflake::default();
-    report("id() —— 默认 5+5+12 布局", rounds(|| {
-        black_box(snowflake.id().unwrap());
-    }));
+    report(
+        "id() —— 默认 5+5+12 布局",
+        rounds(|| {
+            black_box(snowflake.id().unwrap());
+        }),
+    );
 
     let mut snowflake = Snowflake::default();
-    report("id() + parse_id()", rounds(|| {
-        let id = snowflake.id().unwrap();
-        black_box(snowflake.parse_id(id));
-    }));
+    report(
+        "id() + parse_id()",
+        rounds(|| {
+            let id = snowflake.id().unwrap();
+            black_box(snowflake.parse_id(id));
+        }),
+    );
 
     let per_ms = Snowflake::default().max_sequence() + 1;
     println!(

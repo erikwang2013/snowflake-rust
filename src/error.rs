@@ -21,7 +21,11 @@ use std::fmt;
 /// | `\InvalidArgumentException`（配置校验） | [`Error::InvalidConfig`] |
 /// | `\RuntimeException`（序列耗尽） | [`Error::SequenceUnavailable`] |
 /// | 客户端异常冒泡（Redis 故障等） | [`Error::Backend`] |
+///
+/// `#[non_exhaustive]`：日后新增变体（如新的守卫失败模式）就不构成破坏性变更，
+/// 下游匹配请留 `_` 分支。
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum Error {
     /// 系统时钟回拨超过容忍值（`clock_tolerance_ms`）。
     ClockDrift {
@@ -137,9 +141,9 @@ impl fmt::Display for Error {
                 datacenter_id, max_datacenter_id
             ),
             Error::InvalidConfig(message) => f.write_str(message),
-            Error::SequenceUnavailable => f.write_str(
-                "Unable to obtain sequence number. Try reducing ID generation rate.",
-            ),
+            Error::SequenceUnavailable => {
+                f.write_str("Unable to obtain sequence number. Try reducing ID generation rate.")
+            }
             Error::Backend(message) => f.write_str(message),
         }
     }

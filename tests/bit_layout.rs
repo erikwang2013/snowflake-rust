@@ -8,22 +8,10 @@ use snowflake::{Error, Snowflake, SnowflakeBuilder};
 
 #[test]
 fn lifespan_matches_the_readme_table() {
-    assert_eq!(
-        Snowflake::lifespan_ms(5, 5, 12).unwrap(),
-        (1i64 << 41) - 1
-    );
-    assert_eq!(
-        Snowflake::lifespan_ms(7, 7, 10).unwrap(),
-        (1i64 << 39) - 1
-    );
-    assert_eq!(
-        Snowflake::lifespan_ms(5, 5, 16).unwrap(),
-        (1i64 << 37) - 1
-    );
-    assert_eq!(
-        Snowflake::lifespan_ms(5, 5, 20).unwrap(),
-        (1i64 << 33) - 1
-    );
+    assert_eq!(Snowflake::lifespan_ms(5, 5, 12).unwrap(), (1i64 << 41) - 1);
+    assert_eq!(Snowflake::lifespan_ms(7, 7, 10).unwrap(), (1i64 << 39) - 1);
+    assert_eq!(Snowflake::lifespan_ms(5, 5, 16).unwrap(), (1i64 << 37) - 1);
+    assert_eq!(Snowflake::lifespan_ms(5, 5, 20).unwrap(), (1i64 << 33) - 1);
 }
 
 #[test]
@@ -32,7 +20,10 @@ fn wider_sequence_shortens_lifespan() {
     let wide_sequence = Snowflake::lifespan_ms(5, 5, 16).unwrap();
     let widest = Snowflake::lifespan_ms(5, 5, 20).unwrap();
 
-    assert!(default > wide_sequence && wide_sequence > widest, "寿命表不再单调");
+    assert!(
+        default > wide_sequence && wide_sequence > widest,
+        "寿命表不再单调"
+    );
 }
 
 #[test]
@@ -73,9 +64,18 @@ fn worker_and_datacenter_ranges_are_enforced() {
     ));
 
     // 10 位 worker：1024 个节点可用，1024 越界
-    assert!(SnowflakeBuilder::new().worker_bits(10).worker_id(1023).build().is_ok());
+    assert!(
+        SnowflakeBuilder::new()
+            .worker_bits(10)
+            .worker_id(1023)
+            .build()
+            .is_ok()
+    );
     assert!(matches!(
-        SnowflakeBuilder::new().worker_bits(10).worker_id(1024).build(),
+        SnowflakeBuilder::new()
+            .worker_bits(10)
+            .worker_id(1024)
+            .build(),
         Err(Error::InvalidWorkerId { .. })
     ));
 }
@@ -100,12 +100,14 @@ fn bit_count_limits_are_enforced() {
         Err(Error::InvalidConfig(_))
     ));
     // 30 + 30 + 2 = 62 → 通过（时间戳只剩 1 位是另一回事，构建不拦）
-    assert!(SnowflakeBuilder::new()
-        .worker_bits(30)
-        .datacenter_bits(30)
-        .sequence_bits(2)
-        .build()
-        .is_ok());
+    assert!(
+        SnowflakeBuilder::new()
+            .worker_bits(30)
+            .datacenter_bits(30)
+            .sequence_bits(2)
+            .build()
+            .is_ok()
+    );
 }
 
 #[test]

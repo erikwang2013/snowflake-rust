@@ -231,11 +231,15 @@ def defs(body):
     return "\n".join(out)
 
 
-def svg(w, h, body, title, desc):
-    """Wrap the body, then append the copyright footer below the content."""
-    fh = h + FOOTER
-    foot = (text(40, h + 28, COPYRIGHT, 11.5, FAINT)
-            + text(w - 40, h + 28, BADGE, 11.5, FAINT, "600", "end"))
+def svg(w, h, body, title, desc, footer=True):
+    """Wrap the body, then append the copyright footer below the content.
+
+    `footer=False` 供 Social Preview 这类自带版权行的画布使用（尺寸必须精确）。
+    """
+    fh = h + (FOOTER if footer else 0)
+    foot = "" if not footer else (
+        text(40, h + 28, COPYRIGHT, 11.5, FAINT)
+        + text(w - 40, h + 28, BADGE, 11.5, FAINT, "600", "end"))
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {fh}" '
             f'width="{w}" height="{fh}" role="img" font-family="{FONT}">\n'
             f'<title>{esc(title)}</title>\n<desc>{esc(desc)}</desc>\n'
@@ -593,6 +597,86 @@ def request_cycle(L):
     return svg(W, H, "\n".join(body), L("req.title"), L("req.subtitle"))
 
 
+# ------------------------------------------------------------ social preview
+
+def social_preview():
+    """GitHub Social Preview / og:image：1280×640。
+
+    单张、双语，不走 labels 表（README 图是每语言一张，这里是品牌图）。
+    左：大号雪花精灵（pet.svg 的几何放大）；右：项目名、中英标语、能力标签。
+    改完照常光栅化检查：
+
+        rsvg-convert -w 1280 -h 640 docs/social-preview.svg -o docs/social-preview.png
+    """
+    W, H = 1280, 640
+    PX, PY = 300, 330                      # pet centre
+
+    body = ['<rect width="1280" height="640" fill="#ffffff"/>',
+            '<circle cx="300" cy="330" r="300" fill="#f6fbff"/>',
+            '<circle cx="300" cy="330" r="215" fill="#e8f4ff" opacity="0.75"/>']
+
+    def sparkle(x, y, r, o):
+        return (f'<path d="M{x},{y - r} L{x + r * 0.26},{y - r * 0.26} L{x + r},{y} '
+                f'L{x + r * 0.26},{y + r * 0.26} L{x},{y + r} L{x - r * 0.26},{y + r * 0.26} '
+                f'L{x - r},{y} L{x - r * 0.26},{y - r * 0.26} Z" fill="{BLUE}" opacity="{o}"/>')
+
+    body.append(sparkle(96, 130, 16, 0.5) + sparkle(528, 108, 12, 0.4)
+                + sparkle(88, 520, 11, 0.4) + sparkle(520, 548, 15, 0.45))
+
+    # 六条主臂：与 pet.svg 同构，按 1280×640 放大。
+    arms = []
+    for i in range(6):
+        arms.append(f'<g transform="rotate({i * 60} {PX} {PY})">'
+                    f'{line(PX + 70, PY, PX + 215, PY, BLUE, 11)}'
+                    f'{line(PX + 122, PY, PX + 168, PY - 40, CYAN, 7)}'
+                    f'{line(PX + 122, PY, PX + 168, PY + 40, CYAN, 7)}'
+                    f'{line(PX + 166, PY, PX + 206, PY - 30, "#8ecdf0", 5.5)}'
+                    f'{line(PX + 166, PY, PX + 206, PY + 30, "#8ecdf0", 5.5)}'
+                    f'</g>')
+    face = "\n".join([
+        f'<circle cx="{PX}" cy="{PY}" r="70" fill="#ffffff" stroke="#8ecdf0" stroke-width="4.5"/>',
+        f'<circle cx="{PX - 25}" cy="{PY - 12}" r="8.5" fill="{INK}"/>',
+        f'<circle cx="{PX + 25}" cy="{PY - 12}" r="8.5" fill="{INK}"/>',
+        f'<circle cx="{PX - 22}" cy="{PY - 15}" r="2.8" fill="#ffffff"/>',
+        f'<circle cx="{PX + 28}" cy="{PY - 15}" r="2.8" fill="#ffffff"/>',
+        f'<path d="M{PX - 23},{PY + 18} Q{PX},{PY + 38} {PX + 23},{PY + 18}" fill="none" '
+        f'stroke="{INK}" stroke-width="5.5" stroke-linecap="round"/>',
+        f'<ellipse cx="{PX - 45}" cy="{PY + 13}" rx="10" ry="6.5" fill="#ffb3c7" opacity="0.75"/>',
+        f'<ellipse cx="{PX + 45}" cy="{PY + 13}" rx="10" ry="6.5" fill="#ffb3c7" opacity="0.75"/>',
+    ])
+    body.append("\n".join(arms) + face)
+    body.append(text(PX, PY + 262, "雪花精灵 · Snowflake Sprite", 19, MUTED, "600", "middle"))
+
+    # 右侧文案块
+    X = 648
+    body.append(rect(X, 92, 214, 34, BLUE_T, BLUE_B, 17, 1.2))
+    body.append(mini_snowflake(X + 19, 109, 10))
+    body.append(text(X + 33 + tw("snowflake-rust", 15, "600") / 2, 114,
+                     "snowflake-rust", 15, BLUE, "600", "middle"))
+
+    body.append(text(X, 228, "Snowflake Rust", 66, INK, "700", spacing="-1"))
+    body.append(text(X + 2, 276, "64 位 · k-ordered · 全局唯一的分布式 ID 生成器", 26, BODY))
+    body.append(text(X + 2, 316, "64-bit distributed unique ID generator", 21, MUTED))
+    body.append(text(X + 2, 346, "pure std · zero-dependency core · ported from snowflake-php", 21, MUTED))
+
+    chips = [("纯 std · 零依赖", GREEN, GREEN_T), ("8 框架集成", VIOLET, VIOLET_T),
+             ("89 项测试", CYAN, CYAN_T), ("4.1M ID/s", AMBER, AMBER_T)]
+    cx = X
+    for label, color, tint in chips:
+        w = tw(label, 16, "600") + 34
+        body.append(rect(cx, 388, w, 38, tint, None, 19))
+        body.append(text(cx + w / 2, 413, label, 16, color, "600", "middle"))
+        cx += w + 14
+
+    body.append(line(X, 512, W - 60, 512, RULE, 1.5, cap="butt"))
+    body.append(text(X, 556, "© 2026 erik — https://erik.xyz", 15, FAINT, "600"))
+    body.append(text(W - 60, 556, "github.com/erikwang2013/snowflake-rust", 15, FAINT, "400", "end"))
+
+    return svg(W, H, "\n".join(body),
+               "Snowflake Rust — 64-bit distributed unique ID generator",
+               "分布式唯一 ID 生成器 · 项目宠物雪花精灵 · © 2026 erik", footer=False)
+
+
 # ------------------------------------------------------------------- driver
 
 def load_labels(lang):
@@ -636,6 +720,13 @@ def main(argv):
 
     if problems:
         raise SystemExit("incomplete label tables:\n  " + "\n  ".join(problems))
+
+    # 品牌图：不分语言，指写 docs/social-preview.svg（PNG 由 rsvg-convert 产出，
+    # GitHub 仓库 Settings → Social preview 上传，API 不支持）。
+    with open(os.path.join(ROOT, "docs", "social-preview.svg"), "w", encoding="utf-8") as f:
+        f.write(social_preview())
+    print("  brand  social-preview.svg （1280×640）")
+
     print(f"wrote {total} SVG files to {os.path.relpath(OUT_DIR, ROOT)}")
 
 

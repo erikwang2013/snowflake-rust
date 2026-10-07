@@ -68,8 +68,8 @@ impl FromRequest for Guard {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use actix_web::test;
     use crate::Snowflake;
+    use actix_web::test;
 
     fn guard() -> Guard {
         Guard::new(Snowflake::default())

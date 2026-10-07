@@ -50,7 +50,12 @@ fn env_variables_configure_the_generator() {
     assert_eq!(snowflake.worker_id(), 0);
 
     // Rust 不能按类名实例化策略：认不出的名字要报错。
-    unsafe { std::env::set_var("SNOWFLAKE_SEQUENCE_RESOLVER", "Erikwang2013\\Snowflake\\Resolvers\\SequentialSequenceResolver") };
+    unsafe {
+        std::env::set_var(
+            "SNOWFLAKE_SEQUENCE_RESOLVER",
+            "Erikwang2013\\Snowflake\\Resolvers\\SequentialSequenceResolver",
+        )
+    };
     assert!(matches!(
         Snowflake::from_env(),
         Err(Error::InvalidConfig(_))

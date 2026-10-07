@@ -82,6 +82,10 @@
     html_favicon_url = "https://raw.githubusercontent.com/erikwang2013/snowflake-rust/main/docs/pet.svg"
 )]
 #![forbid(unsafe_code)]
+// 门禁：公开 API 必须都有文档（当前零缺口）；文档内链不许断
+// （冗余链接那次就是 rustdoc 提示才发现）。
+#![deny(missing_docs)]
+#![deny(rustdoc::broken_intra_doc_links)]
 
 pub mod config;
 pub mod error;

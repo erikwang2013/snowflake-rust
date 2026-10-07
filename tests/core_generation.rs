@@ -58,7 +58,9 @@ fn shared_generator_keeps_threads_unique_and_monotonic() {
     for _ in 0..THREADS {
         let handle = shared.clone();
         handles.push(std::thread::spawn(move || {
-            (0..PER_THREAD).map(|_| handle.id().unwrap()).collect::<Vec<_>>()
+            (0..PER_THREAD)
+                .map(|_| handle.id().unwrap())
+                .collect::<Vec<_>>()
         }));
     }
 

@@ -47,8 +47,8 @@ impl<'a> FromRequest<'a> for Guard {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use poem::Request;
     use crate::Snowflake;
+    use poem::Request;
 
     fn guard() -> Guard {
         Guard::new(Snowflake::default())

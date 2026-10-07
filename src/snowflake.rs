@@ -478,6 +478,5 @@ impl Default for SnowflakeBuilder {
     }
 }
 
-
 #[cfg(test)]
 mod tests;

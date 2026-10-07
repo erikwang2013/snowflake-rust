@@ -62,12 +62,12 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::Snowflake;
     use axum::Router;
     use axum::body::Body;
     use axum::extract::Extension;
     use axum::http::{Request, StatusCode};
     use axum::routing::get;
-    use crate::Snowflake;
     use tower::ServiceExt as _;
 
     fn guard() -> Guard {
@@ -130,7 +130,9 @@ mod tests {
             .unwrap();
 
         assert_eq!(response.status(), StatusCode::OK);
-        let body = axum::body::to_bytes(response.into_body(), usize::MAX).await.unwrap();
+        let body = axum::body::to_bytes(response.into_body(), usize::MAX)
+            .await
+            .unwrap();
         let id: i64 = std::str::from_utf8(&body).unwrap().parse().unwrap();
         assert!(id > 0);
     }
@@ -144,13 +146,14 @@ mod tests {
     async fn handler_and_state_share_one_generator() {
         async fn handler(guard: Guard, Extension(previous): Extension<i64>) -> String {
             let id = guard.id().unwrap();
-            assert!(id > previous, "处理器与状态不是同一个实例: {id} <= {previous}");
+            assert!(
+                id > previous,
+                "处理器与状态不是同一个实例: {id} <= {previous}"
+            );
             id.to_string()
         }
 
-        let state = BareState {
-            snowflake: guard(),
-        };
+        let state = BareState { snowflake: guard() };
         let previous = state.snowflake.id().unwrap();
 
         let app = Router::new()

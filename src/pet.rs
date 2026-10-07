@@ -63,10 +63,7 @@ mod tests {
     #[test]
     fn art_carries_the_rust_name() {
         assert!(SVG.contains("snowflake-rust"), "形象上的铭牌没换名");
-        assert!(
-            !SVG.contains("snowflake-php"),
-            "还残留 PHP 版名字"
-        );
+        assert!(!SVG.contains("snowflake-php"), "还残留 PHP 版名字");
         assert!(SVG.contains("64 位分布式唯一 ID 生成器"), "图注没了");
     }
 

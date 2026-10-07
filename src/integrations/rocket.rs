@@ -59,9 +59,9 @@ impl<'r> FromRequest<'r> for Guard {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::Snowflake;
     use rocket::local::blocking::Client;
     use rocket::{get, routes};
-    use crate::Snowflake;
 
     fn guard() -> Guard {
         Guard::new(Snowflake::default())
@@ -93,13 +93,19 @@ mod tests {
         // 第二个请求：同一个实例严格单调 —— 拿到同一个守卫的证据
         let res = client.get("/next").dispatch();
         let second: i64 = res.into_string().unwrap().parse().unwrap();
-        assert!(second > first, "两个请求不是同一个发号器: {second} <= {first}");
+        assert!(
+            second > first,
+            "两个请求不是同一个发号器: {second} <= {first}"
+        );
 
         // 刚发出来的 ID 能被同一个守卫反解
         let res = client.get(format!("/parse/{first}")).dispatch();
         assert_eq!(res.status(), Status::Ok);
         let parsed = res.into_string().unwrap();
-        assert!(parsed.starts_with("0:"), "worker 0 的时间戳串，实际 {parsed:?}");
+        assert!(
+            parsed.starts_with("0:"),
+            "worker 0 的时间戳串，实际 {parsed:?}"
+        );
     }
 
     /// 忘了 `manage(...)` 时是 500，不是 panic。

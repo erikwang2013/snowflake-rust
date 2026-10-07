@@ -34,7 +34,11 @@ impl RedisClient for FakeRedis {
     }
 
     fn expire(&mut self, key: &str, seconds: u64) -> Result<()> {
-        self.0.lock().unwrap().expires.push((key.to_string(), seconds));
+        self.0
+            .lock()
+            .unwrap()
+            .expires
+            .push((key.to_string(), seconds));
 
         Ok(())
     }

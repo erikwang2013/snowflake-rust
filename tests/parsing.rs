@@ -69,7 +69,10 @@ fn custom_epoch_moves_the_timeline() {
     let parsed = snowflake.parse_id(id);
 
     assert!(parsed.timestamp_ms >= epoch);
-    assert!((parsed.timestamp_ms - now_ms()).abs() < 5_000, "偏离当下过远");
+    assert!(
+        (parsed.timestamp_ms - now_ms()).abs() < 5_000,
+        "偏离当下过远"
+    );
 }
 
 fn now_ms() -> i64 {

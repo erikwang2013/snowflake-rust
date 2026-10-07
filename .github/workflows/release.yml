@@ -1,0 +1,46 @@
+name: Release
+
+# 推送规则：push 到 main 后，从 Cargo.toml 读取版本号（单一事实来源），
+# 增量补齐缺失的 tag 和 GitHub Release —— 每运行一次只创建尚未存在的版本，
+# 改版本号并推 main 即完成发版。
+#
+# 注意：crates.io 的 `cargo publish` 不在这里做 —— 发布令牌不下发到 CI，
+# 由维护者手动执行（与房子其余项目一致）。
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Tag & Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # 完整历史，避免浅克隆导致 tag 比对失败
+          fetch-depth: 0
+
+      - name: 从 Cargo.toml 获取版本
+        id: version
+        run: |
+          VERSION=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1)
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: 增量创建 tag 与 release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="v${{ steps.version.outputs.version }}"
+          if git rev-parse -q --verify "refs/tags/${TAG}" >/dev/null; then
+            echo "tag ${TAG} 已存在，跳过"
+            exit 0
+          fi
+          git tag "${TAG}"
+          git push origin "${TAG}"
+          gh release create "${TAG}" --title "${TAG}" --generate-notes
+          echo "已创建 ${TAG} tag + release"

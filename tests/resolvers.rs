@@ -88,6 +88,10 @@ fn random_strategy_end_to_end_stays_inside_the_layout() {
         previous = id;
 
         let parsed = snowflake.parse_id(id);
-        assert!((0..=4095).contains(&parsed.sequence), "序列越界: {}", parsed.sequence);
+        assert!(
+            (0..=4095).contains(&parsed.sequence),
+            "序列越界: {}",
+            parsed.sequence
+        );
     }
 }
