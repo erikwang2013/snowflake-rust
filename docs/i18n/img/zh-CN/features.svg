@@ -15,8 +15,8 @@
 <rect x="56.0" y="184.0" width="254.7" height="180.0" rx="12" fill="#ffffff" stroke="#c3d7ff" stroke-width="1.5"/>
 <rect x="56.0" y="184.0" width="4.0" height="180.0" rx="2" fill="#2563eb"/>
 <text x="71.0" y="208" font-size="13.0" fill="#0f1e33" font-weight="700">唯一 ID 生成</text>
-<rect x="71.0" y="216.0" width="93.3" height="18.0" rx="9" fill="#f8fbff"/>
-<text x="117.642625" y="229" font-size="10.5" fill="#2563eb" font-weight="600" text-anchor="middle">id() · next_id()</text>
+<rect x="71.0" y="216.0" width="32.4" height="18.0" rx="9" fill="#f8fbff"/>
+<text x="87.21362500000001" y="229" font-size="10.5" fill="#2563eb" font-weight="600" text-anchor="middle">id()</text>
 <text x="71.0" y="250.0" font-size="11.5" fill="#3d4d66" font-weight="400">64 位、k-ordered、全局唯一；单节点每</text>
 <text x="71.0" y="267.25" font-size="11.5" fill="#3d4d66" font-weight="400">秒 400 万以上，无中心协调节点、无数据</text>
 <text x="71.0" y="284.5" font-size="11.5" fill="#3d4d66" font-weight="400">库往返。</text>
@@ -79,15 +79,15 @@
 <text x="684.3333333333334" y="402" font-size="13.0" fill="#0f1e33" font-weight="700">并发安全</text>
 <rect x="684.3" y="410.0" width="147.9" height="18.0" rx="9" fill="#fbf9ff"/>
 <text x="758.2628333333333" y="423" font-size="10.5" fill="#6d28d9" font-weight="600" text-anchor="middle">Shared · Arc&lt;Mutex&lt;…&gt;&gt;</text>
-<text x="684.3333333333334" y="444.0" font-size="11.5" fill="#3d4d66" font-weight="400">id() 需要 &amp;mut self：PHP 版警告的跨线程</text>
-<text x="684.3333333333334" y="461.25" font-size="11.5" fill="#3d4d66" font-weight="400">共享在这里编译不过；共享走 Shared /</text>
-<text x="684.3333333333334" y="478.5" font-size="11.5" fill="#3d4d66" font-weight="400">Guard，锁内没有 .await。</text>
+<text x="684.3333333333334" y="444.0" font-size="11.5" fill="#3d4d66" font-weight="400">id() 需要 &amp;mut self：跨线程共享实例编译</text>
+<text x="684.3333333333334" y="461.25" font-size="11.5" fill="#3d4d66" font-weight="400">不过；共享走 Shared / Guard，锁内没有</text>
+<text x="684.3333333333334" y="478.5" font-size="11.5" fill="#3d4d66" font-weight="400">.await。</text>
 <rect x="669.3" y="572.0" width="254.7" height="180.0" rx="12" fill="#ffffff" stroke="#d5c6fa" stroke-width="1.5"/>
 <rect x="669.3" y="572.0" width="4.0" height="180.0" rx="2" fill="#6d28d9"/>
 <text x="684.3333333333334" y="596" font-size="13.0" fill="#0f1e33" font-weight="700">质量与交付</text>
 <rect x="684.3" y="604.0" width="116.5" height="18.0" rx="9" fill="#fbf9ff"/>
 <text x="742.6073333333334" y="617" font-size="10.5" fill="#6d28d9" font-weight="600" text-anchor="middle">cargo test · bench</text>
-<text x="684.3333333333334" y="638.0" font-size="11.5" fill="#3d4d66" font-weight="400">89 项测试（8 线程并发唯一性、回拨三态</text>
+<text x="684.3333333333334" y="638.0" font-size="11.5" fill="#3d4d66" font-weight="400">96 项测试（8 线程并发唯一性、回拨三态</text>
 <text x="684.3333333333334" y="655.25" font-size="11.5" fill="#3d4d66" font-weight="400">、Redis 假客户端）、可复现基准、中英双</text>
 <text x="684.3333333333334" y="672.5" font-size="11.5" fill="#3d4d66" font-weight="400">语文档与项目宠物。</text>
 <text x="40" y="796" font-size="11.5" fill="#6b7c96" font-weight="400">运行环境：Rust &gt;= 1.88（edition 2024） · 任意平台（i64） · 每进程一份实例状态，跨线程共享请用 Shared / Guard</text>

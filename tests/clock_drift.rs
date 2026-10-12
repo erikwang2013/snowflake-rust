@@ -61,6 +61,43 @@ fn wait_strategy_configures_and_generates_on_a_healthy_clock() {
 }
 
 #[test]
+fn offset_exactly_at_the_maximum_is_accepted() {
+    // 30 + 30 + 2 = 62 → 时间戳只剩 1 位，max_offset = 1。
+    // 上限的判断是「> 拒绝、== 接受」—— epoch 钉在「此刻 − 1ms」，
+    // 拿到 Ok 的那次偏移必然恰为上限 1（读取时钟跨毫秒只会把偏移顶到 2，
+    // 那就重新钉一次再试）。
+    for _ in 0..20 {
+        let epoch = now_ms() - 1;
+        let mut snowflake = SnowflakeBuilder::new()
+            .worker_bits(30)
+            .datacenter_bits(30)
+            .sequence_bits(2)
+            .epoch(epoch)
+            .build()
+            .unwrap();
+
+        match snowflake.id() {
+            Ok(id) => {
+                assert_eq!(snowflake.parse_id(id).timestamp_ms, epoch + 1);
+                return;
+            }
+            Err(Error::TimestampOverflow { max_offset, .. }) => assert_eq!(max_offset, 1),
+            other => panic!("意外错误: {other:?}"),
+        }
+    }
+
+    panic!("20 次都撞上毫秒跳变");
+}
+
+#[test]
+fn negative_clock_tolerance_is_rejected() {
+    assert!(matches!(
+        SnowflakeBuilder::new().clock_tolerance_ms(-1).build(),
+        Err(Error::InvalidConfig(_))
+    ));
+}
+
+#[test]
 fn wait_budget_must_be_positive() {
     for wait in [0, -5] {
         assert!(

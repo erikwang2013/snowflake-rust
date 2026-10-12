@@ -1,6 +1,6 @@
 // Copyright (c) 2026 erik <erik@erik.xyz> — https://erik.xyz
 
-//! 随机起点序列号策略 —— 对应 `RandomSequenceResolver`。
+//! 随机起点序列号策略。
 
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -11,8 +11,11 @@ use crate::resolver::SequenceResolver;
 /// 同时同一毫秒内的 ID 保持单调递增。
 ///
 /// 随机源是内部 splitmix64（`SystemTime` 纳秒异或栈地址播种），
-/// **不是密码学安全**的 —— 它只为「打乱起点」，不承担任何安全职责；
-/// PHP 版的 `random_int()` 也仅用于同一目的。
+/// **不是密码学安全**的 —— 它只为「打乱起点」，不承担任何安全职责。
+///
+/// 共用节点 ID 时它只是**降低**同毫秒撞序列号的概率，不能替代唯一的
+/// `(datacenter_id, worker_id)`，也不能替代 [`crate::resolvers::RedisSequenceResolver`]
+/// 这样的共享计数器。
 pub struct RandomSequenceResolver {
     rng_state: u64,
     last_timestamp: i64,
@@ -20,7 +23,7 @@ pub struct RandomSequenceResolver {
 }
 
 impl RandomSequenceResolver {
-    /// 新建策略，随机源以当前时间与进程地址播种。
+    /// 新建策略，随机源以当前时间与进程地址（ASLR）播种。
     pub fn new() -> Self {
         Self {
             rng_state: seed(),
@@ -49,7 +52,7 @@ impl SequenceResolver for RandomSequenceResolver {
     fn next(&mut self, timestamp_ms: i64, max_sequence: i64) -> Result<Option<i64>> {
         if timestamp_ms != self.last_timestamp {
             self.last_timestamp = timestamp_ms;
-            // 与 PHP random_int(0, $maxSequence) 一致：起点含 max 本身。
+            // 起点含 max 本身：取值落在 0..=max_sequence。
             self.sequence = (self.splitmix64() % (max_sequence as u64 + 1)) as i64;
 
             return Ok(Some(self.sequence));
@@ -65,7 +68,9 @@ impl SequenceResolver for RandomSequenceResolver {
     }
 }
 
-/// 时间纳秒 + 栈地址（ASLR）—— 两个实例同纳秒创建也能拿到不同种子。
+/// 时间纳秒 + 栈地址（ASLR）。同线程同调用点同纳秒创建的两个实例栈地址相同、
+/// 种子也相同 —— 起点不需要注册，这个角落可以接受（同进程给同一个节点 ID
+/// 建两份实例本来就是配置错误）；跨进程则靠 ASLR 必然不同。
 fn seed() -> u64 {
     let nanos = SystemTime::now()
         .duration_since(UNIX_EPOCH)

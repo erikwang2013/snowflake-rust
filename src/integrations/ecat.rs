@@ -41,7 +41,7 @@ use tower::{Layer, Service};
 use crate::guard::Guard;
 
 /// 把 [`Guard`] 注入每个请求扩展的 tower 层。
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GuardLayer {
     guard: Guard,
 }
@@ -65,10 +65,7 @@ impl<S> Layer<S> for GuardLayer {
 }
 
 /// [`GuardLayer`] 产出的服务。
-///
-/// 不派生 `Debug`：内层的 [`Guard`] 打印它就得锁 Mutex，而「日志里顺手 Debug
-/// 一下」正好可能发生在持锁路径上 —— 不值得为一行调试输出埋这个死锁。
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct GuardService<S> {
     inner: S,
     guard: Guard,
@@ -88,7 +85,8 @@ where
     }
 
     fn call(&mut self, mut req: Request<B>) -> Self::Future {
-        // 处理器侧用 `Extension<Guard>` 或直接 `Guard`（若也用了 axum 适配层）取用
+        // 处理器侧用 `Extension<Guard>` 取用（axum 的 `Guard` 提取器走的是
+        // `State`，不读扩展 —— 与 e-cat 组合时用 `Extension<Guard>`）。
         req.extensions_mut().insert(self.guard.clone());
         self.inner.call(req)
     }

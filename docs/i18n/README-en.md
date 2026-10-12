@@ -8,7 +8,7 @@
   <sub>The mascot ships with the code too — <code>println!("{}", snowflake::pet::ASCII);</code> prints it in any terminal.</sub>
 </p>
 
-A distributed unique ID generator based on Twitter's Snowflake algorithm: 64-bit, k-ordered, globally unique, **pure Rust std, truly zero dependencies**. Ported to Rust from the PHP package [`erikwang2013/snowflake-php`](https://github.com/erikwang2013/snowflake-php) — the mascot, the intro, and the docs came along with it.
+A distributed unique ID generator based on Twitter's Snowflake algorithm: 64-bit, k-ordered, globally unique, **pure Rust std, truly zero dependencies**. The core, the mascot, the docs, the examples and the benchmark all live in one self-contained repository.
 
 [简体中文](../../README.md) · [English](./README-en.md)
 
@@ -22,7 +22,7 @@ Key features:
 - **Pluggable sequence resolvers** — sequential, random, and Redis-backed strategies ship built in; implement the `SequenceResolver` trait to bring your own
 - **Flexible bit allocation** — adjust timestamp/node/datacenter/sequence bits to fit your scale
 - **Clock drift tolerance** — a configurable tolerance window for NTP adjustments, with `throw` / `wait` strategies
-- **Concurrency safety guaranteed by the type system** — `id()` takes `&mut self`: the PHP version's "don't share an instance across coroutines/threads" warning **does not compile** here; share through `Shared` instead
+- **Concurrency safety guaranteed by the type system** — `id()` takes `&mut self`, so sharing one instance across coroutines/threads **does not compile**; share through `Shared` instead
 - **Framework integration** — opt-in adapters for axum / actix-web / rocket / poem / salvo / warp / bee-rust / e-cat, where a handler generates IDs simply by declaring a `Guard` parameter
 - **ID parsing** — decompose generated IDs back into timestamp, node, and sequence components
 
@@ -30,13 +30,13 @@ Key features:
 
 <img src="../../docs/pet.svg" alt="The snowflake sprite — the snowflake-rust project mascot" width="340">
 
-A smiling snowflake. The character design comes from this library's own bit layout — **the six arms are the segments carved out of the 64 bits, and the center is the timestamp**. The artwork was carried over from the PHP version as-is, with only the name plate changed.
+A smiling snowflake. The character design comes from this library's own bit layout — **the six arms are the segments carved out of the 64 bits, and the center is the timestamp**. It is this library's mascot: `docs/pet.svg` is the original artwork, and the name plate bears the project name.
 
 | Design element | What it maps to |
 |------|---------|
 | The snow core at the center | The timestamp field (41 bits by default, ~69.7 years) |
 | The six symmetric arms | The symmetric allocation of the worker / datacenter / sequence bit widths |
-| The name plate `snowflake-rust` | The mascot's name (`pet::NAME`) and version tag |
+| The name plate `snowflake-rust` | The project name and version tag |
 | The smile | Millions of IDs per second per node, no database round-trips needed |
 
 Motto: **every bit is borrowed from the lifespan — spend it wisely.**
@@ -61,7 +61,7 @@ println!("{}", pet::ASCII);
 
 Four constants are public — `pet::NAME` / `pet::TAGLINE` / `pet::ASCII` / `pet::SVG` — shared by the README, the CLI banner, and downstream admin panels.
 
-The mascot also fills every **icon slot** in the code: rustdoc's crate logo and the browser-tab favicon both point at it (via `#![doc(html_logo_url / html_favicon_url)]` in `src/lib.rs`), so the snowflake is what you see on the docs.rs page and in the tab; the badge in the top-right corner of all four diagrams above is its miniature. Wherever there is an icon, it is the mascot.
+The mascot also fills every **icon slot** in the code: rustdoc's crate logo and the browser-tab favicon both point at it (via `#![doc(html_logo_url / html_favicon_url)]` in `src/lib.rs`), so the snowflake is what you see on the docs.rs page and in the tab; the badge in the top-right corner of all four diagrams below is its miniature. Wherever there is an icon, it is the mascot.
 
 `docs/pet.svg` must **not** go into Cargo's `exclude` — `include_str!` reads it at compile time, and excluding it fails the build outright (`cargo package` reports an error rather than silently shipping a broken crate).
 
@@ -77,22 +77,22 @@ snowflake-rust/
 │   ├── lib.rs                 crate docs, module exports
 │   ├── snowflake.rs           Core: Snowflake, SnowflakeBuilder, id(), lifecycle guards
 │   ├── parse.rs               ParsedId decomposition + zero-dependency UTC date formatting
-│   ├── config.rs              SNOWFLAKE_* environment variables (mirrors PHP's fromEnvironment())
+│   ├── config.rs              SNOWFLAKE_* environment variables
 │   ├── error.rs               Error enum + Display + std::error::Error
 │   ├── resolver.rs            SequenceResolver trait (extension point)
 │   ├── resolvers/
 │   │   ├── sequential.rs      Default: 0..max per millisecond
 │   │   ├── random.rs          Random start per millisecond, then increments (splitmix64)
 │   │   └── redis.rs           RedisClient trait + RedisSequenceResolver
-│   ├── shared.rs              Shared(Arc<Mutex<Snowflake>>) — the common essence of PHP's 7 adapters
+│   ├── shared.rs              Shared(Arc<Mutex<Snowflake>>) — the shared shell for threads
 │   ├── guard.rs               Guard (= the framework-context name for Shared) + host of the Guarded trait
 │   ├── integrations/          axum / actix-web / rocket / poem / salvo / warp / bee-rust / e-cat
 │   │                          (one opt-in feature per framework, none pulled in by default)
 │   ├── pet.rs                 Project mascot (NAME / TAGLINE / ASCII / SVG)
 │   └── bin/snowflake.rs       CLI: mascot banner, generate, parse
 ├── examples/
-│   ├── quickstart.rs          Mirrors docs/examples/plain-php.php, runnable as-is
-│   └── bench.rs               Mirrors scripts/benchmark.php, reproduces the throughput benchmark
+│   ├── quickstart.rs          Runnable multi-threaded example
+│   └── bench.rs               Reproduces the throughput benchmark
 ├── tests/                     Core generation, bit allocation, clock guards, parsing, resolvers, Redis, env vars
 ├── scripts/
 │   ├── generate-diagrams.py   Builds docs/i18n/img/<lang>/*.svg (the diagrams in this README)
@@ -102,7 +102,7 @@ snowflake-rust/
 │   ├── i18n/
 │   │   ├── README-en.md       English README
 │   │   └── img/<lang>/        architecture / features / lifecycle / request-cycle diagrams
-│   └── *.png                  Sponsor QR codes
+│   └── *.png / *.svg          Sponsor QR codes & brand art
 ├── Cargo.toml                 zero-dependency core
 └── LICENSE                    MIT
 ```
@@ -114,10 +114,10 @@ snowflake-rust/
 Four layers, with dependencies pointing in one direction only:
 
 - **Application layer** — your axum / actix-web / tokio service, CLI, task process, or any Rust program; it only ever asks for a `Snowflake` instance (or `Shared` when sharing it).
-- **Shared layer** — `Shared` is the core shared shell (`Arc<Mutex<Snowflake>>`), and `guard::Guard` is **the same type** under its framework-integration name. The PHP version wrote a separate adapter for Laravel / Yii2 / Yii3 / Webman / ThinkPHP / Hyperf / PSR-11, and what they actually did was two things: **register a shared singleton** (on the Rust side that is simply `Shared`; `&mut self` stops the cross-coroutine sharing the PHP version warns about at compile time) and **inject it into the request context per framework convention** (on the Rust side, the 8 thin opt-in adapters in `integrations`, where a handler declares a `Guard` parameter). Rust does not need to invent one per DI container: the state is an ordinary type plus a `Guarded` trait.
+- **Shared layer** — `Shared` is the core shared shell (`Arc<Mutex<Snowflake>>`), and `guard::Guard` is **the same type** under its framework-integration name. The whole mental model is just two things: **register the generator as a shared singleton** (that is simply `Shared`; `&mut self` stops cross-coroutine/thread sharing at compile time) and **inject it into the request context per framework convention** (the 8 thin opt-in adapters in `integrations`, where a handler declares a `Guard` parameter). The state is an ordinary type plus a `Guarded` trait, and each framework wires it up by its own convention.
 - **Core layer** — `Snowflake` is the only stateful type: it validates the configuration, precomputes the bit shifts, generates IDs, and parses them back.
 - **Contracts & resolvers** — `SequenceResolver` is the extension point. The core delegates every sequence allocation to it, so swapping the strategy (sequential / random / Redis / custom) never touches the generator.
-- **Cross-cutting** — a single `Error` enum mirrors PHP's semantic exception hierarchy; the `SNOWFLAKE_*` environment variables share their names with the PHP adapters, so one .env works on both sides.
+- **Cross-cutting** — a single `Error` enum carries the full semantic error hierarchy; the `SNOWFLAKE_*` environment variables mirror the builder keys, so the same `SNOWFLAKE_*` variables wire everything.
 
 ## Feature Design
 
@@ -127,9 +127,9 @@ Nine features group into three capability domains:
 
 | Domain | Features |
 |--------|------|
-| **Core** | Unique ID generation (`id()` / `next_id()`) · flexible bit allocation (`lifespan_ms()` computes the lifespan up front) · ID parsing (`parse_id()` / `parse()`) |
+| **Core** | Unique ID generation (`id()`) · flexible bit allocation (`lifespan_ms()` computes the lifespan up front) · ID parsing (`parse_id()` / `parse()`) |
 | **Extension** | Pluggable sequence resolvers (`SequenceResolver` trait) · clock-drift protection (tolerance window + `wait` / `throw`) · framework integration (8 opt-in features, the `Guard` request guard) |
-| **Engineering** | Strict configuration validation (builder + environment variables, two entry points) · concurrency safety (`&mut self` enforced at compile time, sharing via `Shared` / `Guard`) · quality and delivery (89 tests, a reproducible benchmark, bilingual docs) |
+| **Engineering** | Strict configuration validation (builder + environment variables, two entry points) · concurrency safety (`&mut self` enforced at compile time, sharing via `Shared` / `Guard`) · quality and delivery (96 tests, a reproducible benchmark, bilingual docs) |
 
 ## ID Lifecycle
 
@@ -147,7 +147,7 @@ Instance state (`last_timestamp` plus the resolver cursor) lives in memory; stat
 ## Requirements
 
 - Rust ≥ 1.88 (edition 2024; CI runs `cargo test` + `cargo clippy` clean)
-- Any platform — IDs are `i64` and the width is platform-independent (the PHP version required a 64-bit system; Rust has no such problem)
+- Any platform — IDs are `i64` and the width is platform-independent
 - One instance of state per process — guaranteed at compile time by `&mut self`; use `Shared` to share across threads
 
 ## Installation
@@ -168,7 +168,6 @@ use snowflake::Snowflake;
 
 let mut snowflake = Snowflake::default();
 let id = snowflake.id()?;          // e.g. 365855445711060992
-let id = snowflake.next_id()?;     // alias for id()
 ```
 
 With custom worker and datacenter IDs:
@@ -204,7 +203,7 @@ cargo run --example quickstart
 | `clock_drift_strategy` | `.clock_drift_strategy(..)` | `SNOWFLAKE_CLOCK_DRIFT_STRATEGY` | `throw` | When drift exceeds the tolerance: `throw` refuses to generate; `wait` spins until the wall clock catches up |
 | `clock_drift_wait_ms` | `.clock_drift_wait_ms(i64)` | `SNOWFLAKE_CLOCK_DRIFT_WAIT_MS` | `1000` | How long the `wait` strategy waits before giving up |
 
-Environment variable names are **identical** to the PHP adapters, with one exception: `SNOWFLAKE_SEQUENCE_RESOLVER`. PHP takes a fully-qualified class name, but Rust cannot instantiate a type by name, so only the two built-in names `sequential` / `random` are recognized (inject custom resolvers through the builder).
+`SNOWFLAKE_SEQUENCE_RESOLVER` recognizes only the two built-in strategy names `sequential` / `random`; Rust cannot instantiate a type by name, so custom resolvers are injected through the builder.
 
 ### Bit Layout
 
@@ -247,7 +246,7 @@ An unset variable — or one that is empty after trimming — falls back to its 
 
 ## Concurrency & Sharing
 
-The PHP version registers a "shared singleton in the container" through seven framework adapters, and warns again and again: never share an instance across coroutines or threads. The Rust version merges both jobs into a single type:
+Registering the generator as a shared singleton and injecting it into the request context per framework convention — both jobs merge into a single type here:
 
 ```rust
 use snowflake::{Shared, Snowflake};
@@ -264,7 +263,7 @@ std::thread::spawn(move || {
 });
 ```
 
-`Shared` implements `Clone` and wraps an `Arc<Mutex<Snowflake>>`; `id()` / `next_id()` / `parse_id()` are available directly, and `lock()` hands you the generator itself for finer-grained work. A poisoned lock is **recovered** rather than panicked on — the generator has no cross-field invariants, so at worst a panicking lock holder leaves `last_timestamp` in the past, and the "the clock never moves backwards" guard was already there.
+`Shared` implements `Clone` and wraps an `Arc<Mutex<Snowflake>>`; `id()` / `parse_id()` are available directly, and `lock()` hands you the generator itself for finer-grained work. A poisoned lock is **recovered** rather than panicked on — the generator has no cross-field invariants, so at worst a panicking lock holder leaves `last_timestamp` in the past, and the "the clock never moves backwards" guard was already there.
 
 ### Choosing an Instance Lifetime
 
@@ -273,7 +272,7 @@ std::thread::spawn(move || {
 | CLI / short-lived processes | Inline, discard when done — nothing is shared between processes, nothing lingers. |
 | tokio service / multi-threaded service | Once at process startup, wrap in `Shared`, hand it to every task; allocate a unique `(datacenter_id, worker_id)`. |
 
-`id()` itself is very fast and never touches `.await`, so `std::sync::Mutex` is enough — nothing waits inside the critical section (waiting only happens on clock drift or sequence exhaustion). Do **not** build two instances for the same `(datacenter_id, worker_id)` — two copies of the state hand out the same sequence number in the same millisecond.
+`id()` itself is very fast and never touches `.await`, so `std::sync::Mutex` is enough — nothing waits inside the critical section on the normal path. The only two waits (clock drift under the `wait` strategy, sequence exhaustion within a millisecond) happen **while holding the lock**, lasting from sub-millisecond up to `clock_drift_wait_ms`; high-concurrency async services with a large `wait` budget can move those calls into `spawn_blocking`. Do **not** build two instances for the same `(datacenter_id, worker_id)` — two copies of the state hand out the same sequence number in the same millisecond.
 
 ## Framework Integration
 
@@ -292,7 +291,7 @@ Handlers should not have to pass the generator down the call chain: register a `
 
 ```toml
 # Cargo.toml — enable only the one you actually use
-snowflake-id-rust = { version = "1.1", features = ["axum"] }
+snowflake-id-rust = { version = "2", features = ["axum"] }
 ```
 
 ```rust,ignore
@@ -321,7 +320,7 @@ let app = Router::new().route("/orders", get(create_order)).with_state(state);
 
 A real application's state struct holds more than a single ID generator: implement the `Guarded` trait to point at the guard field and the connection pool and configuration beside it are untouched; when the state **is** a guard (`Guard` or `Arc<Guard>`), even that step is unnecessary. The guard and `Shared` are one and the same type — cloning is a single `Arc` reference-count bump, zero cost per request, and what a handler receives is **the same generator** that lives in state.
 
-Forgetting to register it (a missing `app_data` / `manage` / `with_state` step) is not a 4xx, it is a **wiring error**: each adapter layer translates it into a 500 and names the assembly step to check in the response. Failures in generation itself (clock drift, exhausted epoch, exhausted sequence) happen inside the handler body, and the status code to return is the application's call — this library does not decide for you whether "clock drift should be a 500 or a 503".
+Forgetting to register it is not a 4xx, it is a **wiring error**: the adapters that look the guard up from the container at runtime (actix / rocket / poem / salvo / ecat) translate it into a 500 and name the assembly step to check in the response; axum (and bee-rust) and warp never get to runtime — `Rejection = Infallible` / the filter's type chain stop a missing registration at **compile time**. Failures in generation itself (clock drift, exhausted epoch, exhausted sequence) happen inside the handler body, and the status code to return is the application's call — this library does not decide for you whether "clock drift should be a 500 or a 503".
 
 > Framework features are a **Cargo feature union**: when a single binary enables two framework features at once, both enter the dependency graph. A production build should enable only the one you actually use.
 
@@ -337,7 +336,7 @@ Handing out an ID for one web request takes just five steps:
 4. **Generate** — the handler calls `guard.id()`; every request in the process shares the same generator state and the same lock.
 5. **Return** — IDs are strictly monotonic and unique across threads; a generation failure (drift beyond tolerance, exhausted epoch) comes back as `Err` inside the handler body, and the status code it turns into is the application's call.
 
-Missing registration is not a 4xx but a **wiring error**: each adapter layer translates it into a 500 and names the `manage` / `app_data` / `with_state` assembly step to check in the response.
+Missing registration is not a 4xx but a **wiring error**: the adapters that fetch the guard at runtime (actix / rocket / poem / salvo / ecat) return a 500 and name the `manage` / `app_data` / `with_state` assembly step in the response; axum / bee-rust / warp stop it at compile time.
 
 ## ID Parsing
 
@@ -351,19 +350,15 @@ let id = snowflake.id()?;
 
 // Instance method (uses the current instance's bit layout)
 let parsed = snowflake.parse_id(id);
-// ParsedId {
-//     timestamp_ms: 1791293813635,
-//     datetime: "2026-10-06 13:36:53.635".to_string(),
-//     worker_id: 0,
-//     datacenter_id: 0,
-//     sequence: 0,
-// }
+// ParsedId { timestamp_ms: 1791293935523, worker_id: 0, datacenter_id: 0, sequence: 0 }
+// — plain data, Copy / Hash / Ord; the timestamp string is rendered on demand:
+let datetime = parsed.datetime();   // "2026-10-06 13:38:55.523" (UTC)
 
 // Static method (uses the default bit layout)
 let parsed = Snowflake::parse(id, Snowflake::DEFAULT_EPOCH);
 ```
 
-In the PHP version `datetime` is formatted by `date()` in the **server's default timezone**; the Rust version emits **UTC** — two hosts in different timezones render the same ID identically, so reconciling IDs across machines no longer needs the "compare `timestamp_ms` instead" caveat (which, of course, remains the timezone-independent absolute value).
+`parsed.datetime()` emits **UTC** — two hosts in different timezones render the same ID identically, so reconciling IDs across machines no longer needs the "compare `timestamp_ms` instead" caveat (which, of course, remains the timezone-independent absolute value). It also only formats when called, so reading just the components allocates nothing.
 
 ## Sequence Resolvers
 
@@ -452,16 +447,16 @@ One key per millisecond (`{key_prefix}{timestamp offset}`), atomically increment
 
 ## Exception Handling
 
-| Error variant | When | Equivalent PHP exception |
-|----------|----------|----------------|
-| `Error::ClockDrift` | System clock moved backwards beyond tolerance | `ClockDriftException` |
-| `Error::ClockBeforeEpoch` | System clock is earlier than the configured epoch | `ClockDriftException` (custom-message branch) |
-| `Error::TimestampOverflow` | Timestamp offset exceeds the maximum (epoch exhausted) | `TimestampOverflowException` |
-| `Error::InvalidWorkerId` | Worker ID exceeds `2^worker_bits - 1` | `InvalidWorkerIdException` |
-| `Error::InvalidDatacenterId` | Datacenter ID exceeds `2^datacenter_bits - 1` | `InvalidDatacenterIdException` |
-| `Error::InvalidConfig` | Out-of-range bit width, bad resolver value, invalid environment variable | `\InvalidArgumentException` |
-| `Error::SequenceUnavailable` | Sequence exhausted and the next millisecond never arrived | `\RuntimeException` |
-| `Error::Backend` | Sequence backend failure (e.g. Redis unreachable) | client exception bubbles up |
+| Error variant | When |
+|----------|----------|
+| `Error::ClockDrift` | System clock moved backwards beyond tolerance |
+| `Error::ClockBeforeEpoch` | System clock is earlier than the configured epoch |
+| `Error::TimestampOverflow` | Timestamp offset exceeds the maximum (epoch exhausted) |
+| `Error::InvalidWorkerId` | Worker ID exceeds `2^worker_bits - 1` |
+| `Error::InvalidDatacenterId` | Datacenter ID exceeds `2^datacenter_bits - 1` |
+| `Error::InvalidConfig` | Out-of-range bit width, bad resolver value, invalid environment variable |
+| `Error::SequenceUnavailable` | Sequence exhausted and the next millisecond never arrived |
+| `Error::Backend` | Sequence backend failure (e.g. Redis unreachable) |
 
 ## Distributed Deployment
 
@@ -500,7 +495,7 @@ IDs are generated entirely in-process, with no external dependency beyond a sing
 | `id()` — default 5+5+12 layout | **4.11M/s** | 243.5 ns |
 | `id()` + `parse_id()` | 2.58M/s | 387.8 ns |
 
-The `id()` number has a physical ceiling: at most 4096 sequence slots per millisecond (12 bits by default), i.e. **4.096M/s** — and the measurement is already sitting right against it. This is unlike the PHP version, which hit its compute ceiling first (around 1.6M/s): Rust's integer arithmetic is fast enough that the sequence slots are the bottleneck — the bulk of those 243 ns is spent waiting for the next millisecond's slot, and the issuing side has no room left to optimize. Parsing and construction are the comparable compute units.
+The `id()` number has a physical ceiling: at most 4096 sequence slots per millisecond (12 bits by default), i.e. **4.096M/s** — and the measurement is already sitting right against it. Rust's integer arithmetic is fast enough that the sequence slots are the bottleneck — the bulk of those 243 ns is spent waiting for the next millisecond's slot, and the issuing side has no room left to optimize. Parsing and construction are the comparable compute units.
 
 Reproduce it on your own machine:
 
@@ -508,7 +503,7 @@ Reproduce it on your own machine:
 cargo run --release --example bench
 ```
 
-It prints ops/sec and ns/op against a bare clock call as the baseline, best-of-N with the spread. Compare against the baseline rather than reading any single number as a promise — on a busy or virtualised host, the clock call itself dominates the measurement.
+It prints ops/sec and ns/op against a bare clock call as the baseline, best-of-N with the spread. The bench also prints a **non-ceilinged control row** (epoch set 60 s in the past + 20 sequence bits), separating the pure generation cost from the time spent waiting for slots. Compare against the baseline rather than reading any single number as a promise — on a busy or virtualised host, the clock call itself dominates the measurement.
 
 ## Support Welcome
 

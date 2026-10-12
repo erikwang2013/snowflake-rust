@@ -1,6 +1,6 @@
 // Copyright (c) 2026 erik <erik@erik.xyz> — https://erik.xyz
 
-//! 核心生成器 —— 对应 PHP 版的 `Snowflake` 类，全库唯一的有状态类型。
+//! 核心生成器 —— 全库唯一的有状态类型。
 
 use std::fmt;
 use std::str::FromStr;
@@ -54,8 +54,8 @@ impl FromStr for ClockDriftStrategy {
 
 /// Snowflake ID 生成器：64 位、时间有序、跨节点唯一。
 ///
-/// `id()` 需要 `&mut self` —— 与 PHP 版「不要跨协程/线程共享实例」的警告
-/// 不同，Rust 里这个错误**编译不过**；多线程共享请用 [`crate::Shared`]。
+/// `id()` 需要 `&mut self` —— 跨协程/线程共享实例**编译不过**；
+/// 多线程共享请用 [`crate::Shared`]。
 ///
 /// ```
 /// use snowflake::Snowflake;
@@ -117,7 +117,7 @@ impl Snowflake {
             } else if self.clock_drift_strategy == ClockDriftStrategy::Wait {
                 // 骑过回拨而不是失败：等墙钟追平，以等待预算为界，
                 // 严重跑偏的时钟不会把调用方永久卡死。
-                let deadline = Self::current_time_millis() + self.clock_drift_wait_ms;
+                let deadline = Self::current_time_millis().saturating_add(self.clock_drift_wait_ms);
                 timestamp = self.wait_next_millis(self.last_timestamp, Some(deadline))?;
             } else {
                 return Err(Error::ClockDrift {
@@ -146,9 +146,11 @@ impl Snowflake {
 
         let mut sequence = self.sequence_resolver.next(offset, self.max_sequence)?;
 
-        if sequence.is_none() && timestamp == self.last_timestamp {
-            // 本毫秒的 2^sequence_bits 个槽位用尽：等到下一毫秒重试一次。
-            timestamp = self.wait_next_millis(self.last_timestamp, None)?;
+        if sequence.is_none() {
+            // 这一毫秒的槽位用尽 —— 本地游标走完，或共享计数器（Redis 策略）被
+            // 同节点的其他进程走完。两种情况下 trait 契约都承诺「等到下一毫秒
+            // 重试一次」：下一毫秒是全新的游标 / key，必然重新从 0 开始。
+            timestamp = self.wait_next_millis(timestamp, None)?;
             offset = timestamp - self.epoch;
             if offset > self.max_timestamp_offset {
                 return Err(Error::TimestampOverflow {
@@ -167,11 +169,6 @@ impl Snowflake {
         Ok((offset << self.timestamp_shift) | self.fixed_bits | sequence)
     }
 
-    /// [`Snowflake::id`] 的别名，与 PHP 版 `nextId()` 对应。
-    pub fn next_id(&mut self) -> Result<i64> {
-        self.id()
-    }
-
     /// 将本实例生成的 ID 反解为各成分（使用本实例的位布局）。
     pub fn parse_id(&self, id: i64) -> ParsedId {
         parse_with_layout(
@@ -183,8 +180,7 @@ impl Snowflake {
         )
     }
 
-    /// 用默认位布局（5 + 5 + 12）反解任意 Snowflake ID，
-    /// 与 PHP 版静态 `Snowflake::parse($id, $epoch)` 对应。
+    /// 用默认位布局（5 + 5 + 12）反解任意 Snowflake ID。
     pub fn parse(id: i64, epoch: i64) -> ParsedId {
         parse_with_layout(
             id,
@@ -200,6 +196,16 @@ impl Snowflake {
     /// 时间戳字段拿走 63 个数据位里剩下的全部：默认布局（5 + 5 + 12 = 22 位）
     /// 余下 41 位，约 69.7 年。给节点或序列号的每一位，都是从寿命里借的。
     pub fn lifespan_ms(worker_bits: u32, datacenter_bits: u32, sequence_bits: u32) -> Result<i64> {
+        Self::validate_layout(worker_bits, datacenter_bits, sequence_bits)?;
+
+        let total_bits = worker_bits + datacenter_bits + sequence_bits;
+
+        Ok((1i64 << (63 - total_bits)) - 1)
+    }
+
+    /// 位宽组合校验：三种位宽各至少 1，且总和小于 63（时间戳至少要留 1 位）。
+    /// [`Snowflake::lifespan_ms`] 与 [`SnowflakeBuilder::build`] 共用这一处。
+    fn validate_layout(worker_bits: u32, datacenter_bits: u32, sequence_bits: u32) -> Result<()> {
         if worker_bits < 1 || datacenter_bits < 1 || sequence_bits < 1 {
             return Err(Error::InvalidConfig(format!(
                 "Bit counts must be at least 1, got worker={worker_bits}, \
@@ -214,7 +220,7 @@ impl Snowflake {
             )));
         }
 
-        Ok((1i64 << (63 - total_bits)) - 1)
+        Ok(())
     }
 
     /// 本实例配置的 epoch（毫秒）。
@@ -246,10 +252,14 @@ impl Snowflake {
         }
     }
 
-    /// 自旋到墙钟越过 `last_timestamp`。
+    /// 睡到墙钟越过 `last_timestamp`。
     ///
     /// `deadline_ms` 为绝对墙钟毫秒的放弃点：到点仍落后就报
     /// [`Error::ClockDrift`] 而不是继续等。`None` 表示一直等到追上。
+    ///
+    /// 这是 `id()` 里唯一的循环体，正常路径（毫秒没走完）根本到不了这里 ——
+    /// `#[cold]` 让它别挤占热路径的指令布局。
+    #[cold]
     fn wait_next_millis(&self, last_timestamp: i64, deadline_ms: Option<i64>) -> Result<i64> {
         let mut timestamp = Self::current_time_millis();
         while timestamp <= last_timestamp {
@@ -262,7 +272,8 @@ impl Snowflake {
                     tolerance_ms: self.clock_tolerance_ms,
                 });
             }
-            std::thread::sleep(Duration::from_micros(100)); // 与 PHP 版 usleep(100) 一致
+            // 100µs 一步：追平一毫秒最多醒十次，既不烧 CPU 又不拖慢追平节奏。
+            std::thread::sleep(Duration::from_micros(100));
             timestamp = Self::current_time_millis();
         }
 
@@ -296,7 +307,8 @@ impl fmt::Debug for Snowflake {
     }
 }
 
-/// [`Snowflake`] 的构建器 —— 对应 PHP 版构造函数具名参数与 `fromConfig()` 数组。
+/// [`Snowflake`] 的构建器。
+#[must_use = "构建器要调用 .build() 才产出生成器"]
 pub struct SnowflakeBuilder {
     worker_id: i64,
     datacenter_id: i64,
@@ -311,7 +323,7 @@ pub struct SnowflakeBuilder {
 }
 
 impl SnowflakeBuilder {
-    /// 默认配置：等于 PHP 版 `new Snowflake()` 的全部默认值。
+    /// 默认配置：与 [`Snowflake::default`] 相同的全部默认值。
     pub fn new() -> Self {
         Self {
             worker_id: 0,
@@ -393,7 +405,7 @@ impl SnowflakeBuilder {
         self
     }
 
-    /// 校验配置并构建生成器 —— 校验顺序与 PHP 版构造函数一致。
+    /// 校验配置并构建生成器（固定顺序：位宽布局 → 回拨配置 → 节点 ID）。
     pub fn build(self) -> Result<Snowflake> {
         let Self {
             worker_id,
@@ -408,17 +420,12 @@ impl SnowflakeBuilder {
             clock_drift_wait_ms,
         } = self;
 
-        if worker_bits < 1 || datacenter_bits < 1 || sequence_bits < 1 {
-            return Err(Error::InvalidConfig(
-                "Bit counts must be at least 1.".to_string(),
-            ));
-        }
+        Snowflake::validate_layout(worker_bits, datacenter_bits, sequence_bits)?;
 
-        let total_bits = worker_bits + datacenter_bits + sequence_bits;
-        if total_bits >= 63 {
-            return Err(Error::InvalidConfig(
-                "Total worker + datacenter + sequence bits must be less than 63.".to_string(),
-            ));
+        if clock_tolerance_ms < 0 {
+            return Err(Error::InvalidConfig(format!(
+                "Clock tolerance must not be negative, got {clock_tolerance_ms}."
+            )));
         }
 
         if clock_drift_wait_ms < 1 {
@@ -427,7 +434,6 @@ impl SnowflakeBuilder {
             )));
         }
 
-        let timestamp_bits = 63 - total_bits;
         let max_worker_id = (1i64 << worker_bits) - 1;
         let max_datacenter_id = (1i64 << datacenter_bits) - 1;
         let max_sequence = (1i64 << sequence_bits) - 1;
@@ -449,7 +455,10 @@ impl SnowflakeBuilder {
         let datacenter_shift = sequence_bits + worker_bits;
         let timestamp_shift = sequence_bits + worker_bits + datacenter_bits;
         let fixed_bits = (datacenter_id << datacenter_shift) | (worker_id << worker_shift);
-        let max_timestamp_offset = (1i64 << timestamp_bits) - 1;
+        // 与 lifespan_ms 共用同一条公式（上面的 validate_layout 已先返回，
+        // 这里的 Err 不可达）。上限是「> 才拒绝、== 仍然接受」。
+        let max_timestamp_offset =
+            Snowflake::lifespan_ms(worker_bits, datacenter_bits, sequence_bits)?;
 
         Ok(Snowflake {
             epoch: epoch.unwrap_or(Snowflake::DEFAULT_EPOCH),

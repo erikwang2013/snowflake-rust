@@ -1,7 +1,6 @@
 // Copyright (c) 2026 erik <erik@erik.xyz> — https://erik.xyz
 
-//! 基于 Twitter Snowflake 算法的分布式唯一 ID 生成器 —— Rust 移植自 PHP 包
-//! [`erikwang2013/snowflake-php`](https://github.com/erikwang2013/snowflake-php)。
+//! 基于 Twitter Snowflake 算法的分布式唯一 ID 生成器。
 //!
 //! 无需中心协调节点即可生成 64 位、k-ordered、全局唯一的 ID：每个 ID 由
 //! 时间戳、数据中心 ID、工作节点 ID 与序列号组成，单节点每秒上百万个，
@@ -31,9 +30,9 @@
 //!
 //! # 并发
 //!
-//! 生成器是唯一的有状态类型，`id()` 需要 `&mut self`：PHP 版「不要跨协程/线程
-//! 共享实例」的警告在这里编译不过。要跨线程共享，用 [`Shared`] ——
-//! 它就是 PHP 版七个框架适配器（各自注册共享单例）的共同本质。
+//! 生成器是唯一的有状态类型，`id()` 需要 `&mut self`：跨协程/线程共享实例
+//! 在编译期就被拦住。要跨线程共享，用 [`Shared`] —— 把生成器包装成
+//! `Arc<Mutex<Snowflake>>` 的共享单例。
 //!
 //! ```
 //! use snowflake::{Shared, Snowflake};
@@ -73,7 +72,7 @@
 //!
 //! # 错误
 //!
-//! 全部失败收敛为 [`Error`] 一枚枚举，与 PHP 版异常体系一一对应（见 [`error`]）。
+//! 全部失败收敛为 [`Error`] 一枚枚举（见 [`error`]）。
 
 // 项目宠物就是代码里的图标：docs.rs 文档页的 crate 图标与浏览器标签页 favicon
 // 都指向 docs/pet.svg（与 pet::SVG 是同一份文件）。

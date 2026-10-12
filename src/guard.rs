@@ -47,6 +47,6 @@ mod tests {
         assert_eq!(guard.parse_id(id).worker_id, 0);
 
         let cloned: crate::Shared = guard.clone();
-        assert!(cloned.next_id().unwrap() > id, "克隆共享同一实例，必须单调");
+        assert!(cloned.id().unwrap() > id, "克隆共享同一实例，必须单调");
     }
 }

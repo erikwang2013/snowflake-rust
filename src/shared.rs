@@ -1,12 +1,11 @@
 // Copyright (c) 2026 erik <erik@erik.xyz> — https://erik.xyz
 
-//! 共享壳 —— PHP 版七个框架适配器的共同本质，收敛成一个类型。
+//! 共享壳 —— 把生成器注册为应用里的共享单例，收敛成一个类型。
 //!
-//! PHP 版为 Laravel / Yii2 / Yii3 / Webman / ThinkPHP / Hyperf / PSR-11 各写了一个
-//! 适配器，它们做的事其实是同一件：**把生成器注册为容器里的共享单例**。
-//! Rust 没有七个 DI 容器要迎合，`Arc<Mutex<Snowflake>>` 一个壳就够 ——
-//! 而 PHP 版反复警告的「不要跨进程/协程共享实例」，在这里由 `id(&mut self)`
-//! 在编译期拦住：想共享，就必须经过这个 `Mutex`。
+//! 框架集成的心智模型是同一件：**把生成器注册为容器 / 应用状态里的共享
+//! 单例**。Rust 里不需要为每个框架各写一个适配器，`Arc<Mutex<Snowflake>>`
+//! 一个壳就够 —— `id(&mut self)` 在编译期拦住裸共享：想共享，就必须经过
+//! 这个 `Mutex`。
 //!
 //! ```
 //! use snowflake::{Shared, Snowflake};
@@ -17,6 +16,7 @@
 //! # Ok::<(), snowflake::Error>(())
 //! ```
 
+use std::fmt;
 use std::sync::{Arc, Mutex, MutexGuard};
 
 use crate::error::Result;
@@ -26,7 +26,7 @@ use crate::snowflake::Snowflake;
 /// 可克隆、可跨线程的生成器句柄：`Arc<Mutex<Snowflake>>`。
 ///
 /// 一个进程一份生成器状态（即一份 `(timestamp, sequence)`），
-/// 所有线程经由同一把锁取号 —— 这正是 PHP 各适配器注册「共享单例」的语义。
+/// 所有线程经由同一把锁取号 —— 共享单例的语义。
 #[derive(Clone)]
 pub struct Shared {
     inner: Arc<Mutex<Snowflake>>,
@@ -46,13 +46,13 @@ impl Shared {
     }
 
     /// 生成下一个 ID（等价于对锁后调用 [`Snowflake::id`]）。
+    ///
+    /// 正常路径不阻塞（锁的临界区里只有发号本身）。两种例外：时钟回拨走
+    /// `wait` 策略时最多等待 `clock_drift_wait_ms`；本毫秒序列耗尽时睡到
+    /// 下一毫秒（亚毫秒级）—— 两者都发生在**持锁状态下**。高并发 async
+    /// 服务若把 `wait` 预算配得很大，可考虑把这些调用放进 `spawn_blocking`。
     pub fn id(&self) -> Result<i64> {
         self.lock().id()
-    }
-
-    /// [`Shared::id`] 的别名。
-    pub fn next_id(&self) -> Result<i64> {
-        self.lock().next_id()
     }
 
     /// 反解一个 ID（等价于对锁后调用 [`Snowflake::parse_id`]）。
@@ -69,6 +69,17 @@ impl Shared {
         self.inner
             .lock()
             .unwrap_or_else(std::sync::PoisonError::into_inner)
+    }
+}
+
+/// 不锁 Mutex 的 `Debug`：只打印类型名与「状态在锁后」这一事实。
+/// 想看生成器配置请用 [`Shared::lock`] 后打印（或直接调用它的 getter）。
+///
+/// 这样用户的 `#[derive(Debug)] struct AppState { snowflake: Guard, .. }`
+/// 能直接编译，日志里顺手 `{:?}` 也不会贸然锁进发号临界区。
+impl fmt::Debug for Shared {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Shared").finish_non_exhaustive()
     }
 }
 

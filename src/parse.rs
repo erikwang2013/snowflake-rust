@@ -1,24 +1,33 @@
 // Copyright (c) 2026 erik <erik@erik.xyz> — https://erik.xyz
 
-//! ID 反解 —— 对应 PHP 版的 `parseId()` / `parse()`。
+//! ID 反解 —— 从 64 位 ID 取回时间戳、节点与序列号。
 //!
-//! `datetime` 成员在 PHP 版里由 `date()` 按**服务器本地时区**格式化；Rust 版
-//! 手写 UTC 格式化（零依赖），输出与时区无关 —— 与 PHP README「跨机器对账以
-//! `timestamp_ms` 为准」的建议同向，但这里两者都稳定。
+//! `datetime()` 方法手写 UTC 格式化（零依赖），输出不随**服务器本地时区**
+//! 漂移 —— 跨机器对账以 `timestamp_ms` 为准，两者都稳定。
 
-/// 一个 Snowflake ID 被反解出的成分，对应 PHP 版 `parseId()` 返回的关联数组。
-#[derive(Debug, Clone, PartialEq, Eq)]
+/// 一个 Snowflake ID 被反解出的成分。
+///
+/// 纯数据、可 `Copy`：时间串是派生视图（[`ParsedId::datetime`]），不在反解时
+/// 预先格式化 —— 反解常在请求路径上被调用，只取组件时不该为此付一次堆分配。
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct ParsedId {
     /// 生成时刻的绝对毫秒时间戳（UNIX epoch，与时区无关）。
     pub timestamp_ms: i64,
-    /// `timestamp_ms` 的 UTC 渲染，形如 `2025-01-09 00:00:00.123`。
-    pub datetime: String,
     /// 工作节点标识。
     pub worker_id: i64,
     /// 数据中心标识。
     pub datacenter_id: i64,
     /// 毫秒内序号。
     pub sequence: i64,
+}
+
+impl ParsedId {
+    /// `timestamp_ms` 的 UTC 渲染，形如 `2025-01-09 00:00:00.123`。
+    ///
+    /// 按需生成（一次分配）。只要组件的话不必调用。
+    pub fn datetime(&self) -> String {
+        format_utc_ms(self.timestamp_ms)
+    }
 }
 
 /// 按给定位布局反解 ID。实例方法与静态 `parse()` 共用这一份实现。
@@ -44,7 +53,6 @@ pub(crate) fn parse_with_layout(
 
     ParsedId {
         timestamp_ms,
-        datetime: format_utc_ms(timestamp_ms),
         worker_id,
         datacenter_id,
         sequence,
@@ -101,7 +109,7 @@ mod tests {
         // 闰日与年末
         assert_eq!(format_utc_ms(1_709_210_096_789), "2024-02-29 12:34:56.789");
         assert_eq!(format_utc_ms(1_735_689_599_999), "2024-12-31 23:59:59.999");
-        // 源项目 README 的示例时间戳（UTC 解读）
+        // 2025-01-09 00:00:00.123 UTC 的毫秒时间戳
         assert_eq!(format_utc_ms(1_736_380_800_123), "2025-01-09 00:00:00.123");
     }
 
@@ -117,11 +125,11 @@ mod tests {
             parsed,
             ParsedId {
                 timestamp_ms: 1_736_380_800_123,
-                datetime: "2025-01-09 00:00:00.123".to_string(),
                 worker_id: 5,
                 datacenter_id: 3,
                 sequence: 42,
             }
         );
+        assert_eq!(parsed.datetime(), "2025-01-09 00:00:00.123");
     }
 }

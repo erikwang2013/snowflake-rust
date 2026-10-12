@@ -8,7 +8,7 @@
   <sub>宠物也已随代码发布——<code>println!("{}", snowflake::pet::ASCII);</code> 即可在终端打印它。</sub>
 </p>
 
-基于 Twitter Snowflake 算法的分布式唯一 ID 生成器：64 位、k-ordered、全局唯一，**纯 Rust std、真正零依赖**。Rust 移植自 PHP 包 [`erikwang2013/snowflake-php`](https://github.com/erikwang2013/snowflake-php) —— 宠物、简介、说明一并搬了过来。
+基于 Twitter Snowflake 算法的分布式唯一 ID 生成器：64 位、k-ordered、全局唯一，**纯 Rust std、真正零依赖**。核心、宠物、文档、示例与基准都在同一个仓库里，自给自足。
 
 [简体中文](./README.md) · [English](docs/i18n/README-en.md)
 
@@ -22,7 +22,7 @@ Snowflake Rust 无需中心协调节点即可生成 64 位、k-ordered、全局�
 - **可插拔序列号策略**——内置顺序递增、随机与 Redis 三种策略，实现 `SequenceResolver` trait 即可自定义
 - **灵活的位分配**——可调整时间戳/节点/数据中心/序列号的位数以适应业务规模
 - **时钟回拨容忍**——可配置的 NTP 校时容忍窗口，`throw` / `wait` 两种策略
-- **并发安全由类型系统保证**——`id()` 需要 `&mut self`：PHP 版「不要跨协程/线程共享实例」的警告在这里**编译不过**；共享走 `Shared`
+- **并发安全由类型系统保证**——`id()` 需要 `&mut self`：跨协程/线程共享实例在这里**编译不过**；共享走 `Shared`
 - **框架集成**——axum / actix-web / rocket / poem / salvo / warp / bee-rust / e-cat 的 opt-in 适配，处理器直接声明 `Guard` 参数即可发号
 - **ID 解析**——可将生成的 ID 反向分解为时间戳、节点、序列号等成分
 
@@ -30,13 +30,13 @@ Snowflake Rust 无需中心协调节点即可生成 64 位、k-ordered、全局�
 
 <img src="./docs/pet.svg" alt="雪花精灵——snowflake-rust 项目宠物" width="340">
 
-一片微笑的雪花。人设取自本库的位布局——**六个分支就是 64 位里分出去的那几段，中心是时间戳**。形象自 PHP 版原样移植，只换了铭牌。
+一片微笑的雪花。人设取自本库的位布局——**六个分支就是 64 位里分出去的那几段，中心是时间戳**。它是本库的吉祥物：`docs/pet.svg` 就是原画，铭牌上写着项目名。
 
 | 形象 | 对应设计 |
 |------|---------|
 | 中心的雪核 | 时间戳字段（默认 41 位，约 69.7 年） |
 | 六个对称分支 | worker / datacenter / sequence 三段位宽的对称分配 |
-| 铭牌 `snowflake-rust` | 宠物名（`pet::NAME`）与版本标识 |
+| 铭牌 `snowflake-rust` | 项目名与版本标识 |
 | 微笑的表情 | 单节点每秒上百万个 ID，不需要数据库往返 |
 
 座右铭：**每一位都是从寿命里借的，省着用。**
@@ -77,22 +77,22 @@ snowflake-rust/
 │   ├── lib.rs                 crate 文档、模块导出
 │   ├── snowflake.rs           核心：Snowflake、SnowflakeBuilder、id()、生命周期守卫
 │   ├── parse.rs               ParsedId 反解 + 零依赖 UTC 日期格式化
-│   ├── config.rs              SNOWFLAKE_* 环境变量（对应 PHP 的 fromEnvironment()）
+│   ├── config.rs              SNOWFLAKE_* 环境变量
 │   ├── error.rs               Error 枚举 + Display + std::error::Error
 │   ├── resolver.rs            SequenceResolver trait（扩展点）
 │   ├── resolvers/
 │   │   ├── sequential.rs      默认：每毫秒从 0 顺序递增
 │   │   ├── random.rs          每毫秒随机起点后递增（splitmix64）
 │   │   └── redis.rs           RedisClient trait + RedisSequenceResolver
-│   ├── shared.rs              Shared(Arc<Mutex<Snowflake>>) —— 7 个 PHP 适配器的共同本质
+│   ├── shared.rs              Shared(Arc<Mutex<Snowflake>>) —— 跨线程共享壳
 │   ├── guard.rs               Guard（= Shared 的框架语境名字）+ Guarded trait 宿主
 │   ├── integrations/          axum / actix-web / rocket / poem / salvo / warp / bee-rust / e-cat
 │   │                          （每框架一个 opt-in feature，默认一个都不拉）
 │   ├── pet.rs                 项目宠物（NAME / TAGLINE / ASCII / SVG）
 │   └── bin/snowflake.rs       CLI：宠物 banner、发号、反解
 ├── examples/
-│   ├── quickstart.rs          对应 docs/examples/plain-php.php，可直接运行
-│   └── bench.rs               对应 scripts/benchmark.php，可复现吞吐基准
+│   ├── quickstart.rs          可直接运行的多线程示例
+│   └── bench.rs               可复现吞吐基准
 ├── tests/                     核心生成、位分配、时钟守卫、解析、策略、Redis、环境变量
 ├── scripts/
 │   ├── generate-diagrams.py   生成 docs/i18n/img/<lang>/*.svg（本 README 的图）
@@ -102,7 +102,7 @@ snowflake-rust/
 │   ├── i18n/
 │   │   ├── README-en.md       English README
 │   │   └── img/<lang>/        架构 / 功能 / 生命周期 / 请求周期 图
-│   └── *.png                  赞助码
+│   └── *.png / *.svg          赞助码与品牌图
 ├── Cargo.toml                 核心零依赖
 └── LICENSE                    MIT
 ```
@@ -114,10 +114,10 @@ snowflake-rust/
 四层结构，依赖方向单向向下：
 
 - **应用层** —— 你的 axum / actix-web / tokio 服务、CLI、任务进程，或任何 Rust 程序；它只需要一个 `Snowflake` 实例（共享时用 `Shared`）。
-- **共享层** —— `Shared` 是核心的共享壳（`Arc<Mutex<Snowflake>>`），`guard::Guard` 是它在框架集成语境下的**同一个类型**。PHP 版为 Laravel / Yii2 / Yii3 / Webman / ThinkPHP / Hyperf / PSR-11 各写了一个适配器，做的事情其实是两件：**注册共享单例**（Rust 侧就是 `Shared`，`&mut self` 在编译期拦住 PHP 警告的跨协程共享）与**按框架惯例注入请求上下文**（Rust 侧是 `integrations` 里 8 个 opt-in 薄适配，处理器直接声明 `Guard` 参数）。Rust 不需要为每个 DI 容器发明一套，状态就是普通类型加一个 `Guarded` trait。
+- **共享层** —— `Shared` 是核心的共享壳（`Arc<Mutex<Snowflake>>`），`guard::Guard` 是它在框架集成语境下的**同一个类型**。整个心智模型只有两件事：**把生成器注册为共享单例**（就是 `Shared`，`&mut self` 在编译期拦住跨协程/线程共享）与**按框架惯例注入请求上下文**（`integrations` 里 8 个 opt-in 薄适配，处理器直接声明 `Guard` 参数）。状态就是普通类型加一个 `Guarded` trait，每个框架按自己的惯例接入。
 - **核心层** —— `Snowflake` 是唯一的有状态类型：负责配置校验、位运算预计算、ID 生成与反解。
 - **契约与实现层** —— `SequenceResolver` 是扩展点。核心把每个毫秒的序列号分配全部委托给它，因此更换策略（顺序 / 随机 / Redis / 自定义）无需改动生成器。
-- **横切关注点** —— `Error` 一枚枚举对应 PHP 的语义化异常体系；`SNOWFLAKE_*` 环境变量与 PHP 各适配器同名，一套 .env 两边通用。
+- **横切关注点** —— `Error` 一枚枚举承载完整的语义化错误体系；`SNOWFLAKE_*` 环境变量与构建器配置一一对应，同一套 `SNOWFLAKE_*` 变量即可装配。
 
 ## 功能设计
 
@@ -127,9 +127,9 @@ snowflake-rust/
 
 | 能力域 | 功能 |
 |--------|------|
-| **核心能力** | 唯一 ID 生成（`id()` / `next_id()`）· 弹性位分配（`lifespan_ms()` 先算寿命）· ID 反向解析（`parse_id()` / `parse()`） |
+| **核心能力** | 唯一 ID 生成（`id()`）· 弹性位分配（`lifespan_ms()` 先算寿命）· ID 反向解析（`parse_id()` / `parse()`） |
 | **扩展能力** | 可插拔序列策略（`SequenceResolver` trait）· 时钟回拨保护（容忍窗口 + `wait` / `throw`）· 框架集成（8 个 opt-in feature，`Guard` 请求守卫） |
-| **工程保障** | 严格配置校验（构建器 + 环境变量两个入口）· 并发安全（`&mut self` 编译期保证，`Shared` / `Guard` 共享）· 质量与交付（89 项测试、可复现基准、中英双语文档） |
+| **工程保障** | 严格配置校验（构建器 + 环境变量两个入口）· 并发安全（`&mut self` 编译期保证，`Shared` / `Guard` 共享）· 质量与交付（96 项测试、可复现基准、中英双语文档） |
 
 ## ID 生命周期
 
@@ -147,7 +147,7 @@ snowflake-rust/
 ## 环境要求
 
 - Rust ≥ 1.88（edition 2024；CI 建议 `cargo test` + `cargo clippy` 全绿）
-- 任意平台——ID 是 `i64`，宽度与平台无关（PHP 版要求 64 位系统，Rust 没有这个问题）
+- 任意平台——ID 是 `i64`，宽度与平台无关
 - 每进程一份实例状态——`&mut self` 在编译期保证；跨线程共享请用 `Shared`
 
 ## 安装
@@ -167,7 +167,6 @@ use snowflake::Snowflake;
 
 let mut snowflake = Snowflake::default();
 let id = snowflake.id()?;          // 例如 365855445711060992
-let id = snowflake.next_id()?;     // id() 的别名
 ```
 
 指定 worker ID 和 datacenter ID：
@@ -203,7 +202,7 @@ cargo run --example quickstart
 | `clock_drift_strategy` | `.clock_drift_strategy(..)` | `SNOWFLAKE_CLOCK_DRIFT_STRATEGY` | `throw` | 回拨超容忍时：`throw` 直接拒绝生成；`wait` 自旋等待墙钟追平 |
 | `clock_drift_wait_ms` | `.clock_drift_wait_ms(i64)` | `SNOWFLAKE_CLOCK_DRIFT_WAIT_MS` | `1000` | `wait` 策略放弃前的最长等待（毫秒） |
 
-环境变量名与 PHP 版各适配器**完全一致**；`SNOWFLAKE_SEQUENCE_RESOLVER` 是唯一例外：PHP 收类的完整限定名，Rust 不能按名字实例化类型，因此只认 `sequential` / `random` 两个内置名（自定义策略请用构建器注入）。
+`SNOWFLAKE_SEQUENCE_RESOLVER` 只认内置策略名 `sequential` / `random`；Rust 不能按名字实例化类型，自定义策略请用构建器注入。
 
 ### 位分配
 
@@ -246,7 +245,7 @@ let snowflake = snowflake::Snowflake::from_env()?;
 
 ## 并发与共享
 
-PHP 版用七个框架适配器注册「容器里的共享单例」，并反复警告：不要在协程/线程之间共享实例。Rust 版把这两件事合并成一个类型：
+把生成器注册为共享单例、再按框架惯例注入请求上下文——这两件事在 Rust 版合并成一个类型：
 
 ```rust
 use snowflake::{Shared, Snowflake};
@@ -263,7 +262,7 @@ std::thread::spawn(move || {
 });
 ```
 
-`Shared` 实现 `Clone`，内部是 `Arc<Mutex<Snowflake>>`；`id()` / `next_id()` / `parse_id()` 直接可用，`lock()` 取到生成器本体做更细的操作。锁中毒会**恢复**而不是 panic——生成器没有跨字段不变量，持锁者 panic 最多让 `last_timestamp` 停在过去，「时钟不倒退」的守卫本来就在。
+`Shared` 实现 `Clone`，内部是 `Arc<Mutex<Snowflake>>`；`id()` / `parse_id()` 直接可用，`lock()` 取到生成器本体做更细的操作。锁中毒会**恢复**而不是 panic——生成器没有跨字段不变量，持锁者 panic 最多让 `last_timestamp` 停在过去，「时钟不倒退」的守卫本来就在。
 
 ### 实例生命周期怎么选
 
@@ -272,7 +271,7 @@ std::thread::spawn(move || {
 | CLI / 短命进程 | 内联创建，用完即弃——进程间不共享，无残留。 |
 | tokio 服务 / 多线程服务 | 进程启动时创建一次，包进 `Shared`，分发给所有任务；分配唯一的 `(datacenter_id, worker_id)`。 |
 
-`id()` 本身极快且不碰 `.await`：`std::sync::Mutex` 即可，锁的临界区里没有等待（等待只发生在时钟回拨或序列耗尽时）。**不要**给同一个 `(datacenter_id, worker_id)` 建两份实例——两份状态会在同一毫秒发出相同的序列号。
+`id()` 本身极快且不碰 `.await`：`std::sync::Mutex` 即可——正常路径的临界区里没有等待。仅有的两种等待（时钟回拨走 `wait` 策略、本毫秒序列耗尽）发生在**持锁状态下**，时长在亚毫秒到 `clock_drift_wait_ms` 之间；把 `wait` 预算配得很大的高并发 async 服务可以把调用放进 `spawn_blocking`。**不要**给同一个 `(datacenter_id, worker_id)` 建两份实例——两份状态会在同一毫秒发出相同的序列号。
 
 ## 框架集成
 
@@ -291,7 +290,7 @@ std::thread::spawn(move || {
 
 ```toml
 # Cargo.toml —— 只开你真正在用的那个
-snowflake-id-rust = { version = "1.1", features = ["axum"] }
+snowflake-id-rust = { version = "2", features = ["axum"] }
 ```
 
 ```rust,ignore
@@ -320,7 +319,7 @@ let app = Router::new().route("/orders", get(create_order)).with_state(state);
 
 真实应用的状态结构体不会只有一把发号器：实现 `Guarded` trait 指向守卫字段即可，旁边的连接池、配置不受影响；状态**就是**一把守卫时（`Guard` 或 `Arc<Guard>`）连这步都不用写。守卫与 `Shared` 是同一个类型——克隆只是一次 `Arc` 引用计数递增，每请求零成本，处理器拿到的与状态里的是**同一个发号器**。
 
-忘了注册（`app_data` / `manage` / `with_state` 漏一步）不是 4xx，是**装配错误**：各适配层把它翻译成 500，并在响应里点名检查装配步骤。发号本身的失败（时钟回拨、epoch 耗尽、序列耗尽）发生在处理器体里，返回什么状态码由应用自己决定——本库不替你决定「时钟回拨该 500 还是 503」。
+忘了注册不是 4xx，是**装配错误**：actix / rocket / poem / salvo / ecat 这些运行期从容器取守卫的适配层把它翻译成 500，并在响应里点名检查装配步骤；axum（与 bee-rust）、warp 则到不了运行期——提取器 `Rejection = Infallible` / 闭包类型链在**编译期**就把「忘注册」拦住。发号本身的失败（时钟回拨、epoch 耗尽、序列耗尽）发生在处理器体里，返回什么状态码由应用自己决定——本库不替你决定「时钟回拨该 500 还是 503」。
 
 > 框架特性之间是 **Cargo feature 并集**：同一个二进制同时开两个框架特性时，两个都会进依赖图。生产构建只开你真正在用的那个。
 
@@ -336,7 +335,7 @@ let app = Router::new().route("/orders", get(create_order)).with_state(state);
 4. **发号**——处理器调用 `guard.id()`；同一个进程里所有请求共用同一份生成器状态、同一把锁。
 5. **返回**——ID 严格单调、跨线程唯一；发号失败（回拨超容忍、epoch 耗尽）在处理器体内返回 `Err`，转成什么状态码由应用决定。
 
-忘了注册不是 4xx 而是**装配错误**：各适配层把它翻译成 500，并在响应里点名检查 `manage` / `app_data` / `with_state` 装配步骤。
+忘了注册不是 4xx 而是**装配错误**：运行期取守卫的适配层（actix / rocket / poem / salvo / ecat）返回 500 并在响应里点名 `manage` / `app_data` / `with_state` 装配步骤；axum / bee-rust / warp 在编译期就拦下。
 
 ## ID 解析
 
@@ -350,19 +349,15 @@ let id = snowflake.id()?;
 
 // 实例方法（使用当前实例的位分配）
 let parsed = snowflake.parse_id(id);
-// ParsedId {
-//     timestamp_ms: 1791293813635,
-//     datetime: "2026-10-06 13:36:53.635".to_string(),
-//     worker_id: 0,
-//     datacenter_id: 0,
-//     sequence: 0,
-// }
+// ParsedId { timestamp_ms: 1791293935523, worker_id: 0, datacenter_id: 0, sequence: 0 }
+// —— 纯数据、Copy / Hash / Ord；时间串按需生成（调用时才格式化，只取组件时零分配）：
+let datetime = parsed.datetime();   // "2026-10-06 13:38:55.523"（UTC）
 
 // 静态方法（使用默认位分配）
 let parsed = Snowflake::parse(id, Snowflake::DEFAULT_EPOCH);
 ```
 
-`datetime` 在 PHP 版里由 `date()` 按**服务器本地时区**格式化，Rust 版输出 **UTC**——两个时区的机器解析同一个 ID 得到同样的字符串，跨机器对账不再需要以 `timestamp_ms` 为准的提醒（当然它依然是与时区无关的绝对毫秒值）。
+`datetime()` 输出 **UTC**——不同时区的机器解析同一个 ID 得到相同的字符串，跨机器对账不再需要以 `timestamp_ms` 为准的提醒（当然它依然是与时区无关的绝对毫秒值）。
 
 ## 序列号策略
 
@@ -451,16 +446,16 @@ let mut snowflake = Snowflake::builder()
 
 ## 异常处理
 
-| 错误变体 | 触发条件 | 对应的 PHP 异常 |
-|----------|----------|----------------|
-| `Error::ClockDrift` | 系统时钟回拨超过容忍值 | `ClockDriftException` |
-| `Error::ClockBeforeEpoch` | 系统时钟早于配置的 epoch | `ClockDriftException`（自定义消息分支） |
-| `Error::TimestampOverflow` | 时间戳偏移超过最大值（epoch 已耗尽） | `TimestampOverflowException` |
-| `Error::InvalidWorkerId` | Worker ID 超出 `2^worker_bits - 1` | `InvalidWorkerIdException` |
-| `Error::InvalidDatacenterId` | Datacenter ID 超出 `2^datacenter_bits - 1` | `InvalidDatacenterIdException` |
-| `Error::InvalidConfig` | 位宽越界、策略取值错误、环境变量非法 | `\InvalidArgumentException` |
-| `Error::SequenceUnavailable` | 序列号耗尽且等不到下一毫秒 | `\RuntimeException` |
-| `Error::Backend` | 序列策略后端故障（如 Redis 连不上） | 客户端异常冒泡 |
+| 错误变体 | 触发条件 |
+|----------|----------|
+| `Error::ClockDrift` | 系统时钟回拨超过容忍值 |
+| `Error::ClockBeforeEpoch` | 系统时钟早于配置的 epoch |
+| `Error::TimestampOverflow` | 时间戳偏移超过最大值（epoch 已耗尽） |
+| `Error::InvalidWorkerId` | Worker ID 超出 `2^worker_bits - 1` |
+| `Error::InvalidDatacenterId` | Datacenter ID 超出 `2^datacenter_bits - 1` |
+| `Error::InvalidConfig` | 位宽越界、策略取值错误、环境变量非法 |
+| `Error::SequenceUnavailable` | 序列号耗尽且等不到下一毫秒 |
+| `Error::Backend` | 序列策略后端故障（如 Redis 连不上） |
 
 ## 分布式部署
 
@@ -499,7 +494,7 @@ ID 生成完全在进程内完成，没有一次系统调用之外的外部依�
 | `id()` —— 默认 5+5+12 布局 | **411 万/秒** | 243.5 ns |
 | `id()` + `parse_id()` | 258 万/秒 | 387.8 ns |
 
-`id()` 的数字有个物理上限：每个毫秒最多 4096 个序列号（默认 12 位），即 **4.096M/s**——实测已经贴在它上面了。这与 PHP 版（算力先到顶，约 1.6M/s）不同：Rust 的整数运算快到序列槽位才是瓶颈，243ns 里绝大多数时间是在等下一个毫秒的槽位，发号侧已无优化空间。解析与构造才是可比较的计算量。
+`id()` 的数字有个物理上限：每个毫秒最多 4096 个序列号（默认 12 位），即 **4.096M/s**——实测已经贴在它上面了。Rust 的整数运算快到让序列槽位成为瓶颈，243ns 里绝大多数时间是在等下一个毫秒的槽位，发号侧已无优化空间。解析与构造才是可比较的计算量。
 
 可在你自己的机器上复现：
 
@@ -507,7 +502,7 @@ ID 生成完全在进程内完成，没有一次系统调用之外的外部依�
 cargo run --release --example bench
 ```
 
-输出以裸时钟调用为基准的 ops/sec 与 ns/op，取 N 轮最优并给出波动。请对照基准列看比例，而不要把任何单次数字当作承诺——繁忙或虚拟化的宿主机上，时钟调用本身就会主导测量。
+输出以裸时钟调用为基准的 ops/sec 与 ns/op，取 N 轮最优并给出波动。bench 还输出一行**不撞顶对照**（epoch 拨前 60 秒 + 20 位序列），把纯生成成本与「等槽位」的时间分开量。请对照基准列看比例，而不要把任何单次数字当作承诺——繁忙或虚拟化的宿主机上，时钟调用本身就会主导测量。
 
 ## 开源不易，欢迎支持
 

@@ -1,26 +1,24 @@
 // Copyright (c) 2026 erik <erik@erik.xyz> — https://erik.xyz
 
-//! 错误类型 —— 对应 PHP 版的异常体系（`SnowflakeException` 基类 + 五个子类）。
+//! 错误类型 —— 全库的失败模式收敛为一枚枚举。
 //!
-//! PHP 用「异常基类 + 子类」表达六种失败；Rust 收敛为一个枚举，每个变体保留
-//! 原异常携带的上下文字段，[`Display`](std::fmt::Display) 文案与原异常逐字对齐，
-//! 便于两边日志对账。
+//! 每个变体携带失败现场的上下文字段，[`Display`](std::fmt::Display) 文案稳定：
+//! 下游的日志与告警可以它为锚。
 
 use std::fmt;
 
-/// Snowflake 的全部错误，对应 PHP 版异常体系：
+/// Snowflake 的全部错误，按失败场景分类：
 ///
-/// | PHP 异常 | Rust 变体 |
+/// | 场景 | 变体 |
 /// |---|---|
-/// | `SnowflakeException`（基类） | `Error` 本身 |
-/// | `ClockDriftException`（回拨超容忍） | [`Error::ClockDrift`] |
-/// | `ClockDriftException`（时钟早于 epoch） | [`Error::ClockBeforeEpoch`] |
-/// | `TimestampOverflowException` | [`Error::TimestampOverflow`] |
-/// | `InvalidWorkerIdException` | [`Error::InvalidWorkerId`] |
-/// | `InvalidDatacenterIdException` | [`Error::InvalidDatacenterId`] |
-/// | `\InvalidArgumentException`（配置校验） | [`Error::InvalidConfig`] |
-/// | `\RuntimeException`（序列耗尽） | [`Error::SequenceUnavailable`] |
-/// | 客户端异常冒泡（Redis 故障等） | [`Error::Backend`] |
+/// | 系统时钟回拨超容忍 | [`Error::ClockDrift`] |
+/// | 系统时钟早于配置的 epoch | [`Error::ClockBeforeEpoch`] |
+/// | 时间戳偏移超出位宽上限 | [`Error::TimestampOverflow`] |
+/// | worker ID 越界 | [`Error::InvalidWorkerId`] |
+/// | datacenter ID 越界 | [`Error::InvalidDatacenterId`] |
+/// | 配置校验失败 | [`Error::InvalidConfig`] |
+/// | 序列号耗尽 | [`Error::SequenceUnavailable`] |
+/// | 序列策略后端故障 | [`Error::Backend`] |
 ///
 /// `#[non_exhaustive]`：日后新增变体（如新的守卫失败模式）就不构成破坏性变更，
 /// 下游匹配请留 `_` 分支。
@@ -36,8 +34,8 @@ pub enum Error {
         /// 配置的回拨容忍值（毫秒）。
         tolerance_ms: i64,
     },
-    /// 系统时钟早于配置的 epoch —— 配置错误或时钟大幅倒退，
-    /// PHP 版同样抛出 `ClockDriftException`（走自定义消息分支），这里单列变体。
+    /// 系统时钟早于配置的 epoch —— 配置错误或时钟大幅倒退。
+    /// 与回拨同属时钟异常，但触发条件与处置不同，因此单列变体。
     ClockBeforeEpoch {
         /// 配置的 epoch（毫秒）。
         epoch_ms: i64,
@@ -70,8 +68,7 @@ pub enum Error {
     /// 序列号耗尽且推进到下一毫秒后仍拿不到 —— 发号速率超过了节点上限。
     SequenceUnavailable,
     /// 序列策略的后端故障（如 Redis 连接失败），由策略实现上报。
-    /// 不降级、不吞掉 —— 静默的失败会发出重复 ID；PHP 版让客户端异常直接冒泡，
-    /// 与此同一取向。
+    /// 不降级、不吞掉 —— 静默的失败会发出重复 ID，客户端故障必须直接冒泡。
     Backend(String),
 }
 
@@ -92,7 +89,7 @@ impl Error {
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            // 与 ClockDriftException 的默认文案逐字对齐。
+            // 文案保持稳定：下游的日志与告警依赖它的形状。
             Error::ClockDrift {
                 last_timestamp_ms,
                 current_timestamp_ms,
@@ -105,7 +102,7 @@ impl fmt::Display for Error {
                 current_timestamp_ms,
                 tolerance_ms
             ),
-            // 与 ClockDriftException 的自定义消息分支对齐。
+            // 点名 epoch 与当前时钟，便于现场诊断。
             Error::ClockBeforeEpoch {
                 epoch_ms,
                 current_timestamp_ms,
@@ -159,7 +156,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn clock_drift_message_matches_php_exception() {
+    fn clock_drift_message_is_stable() {
         let e = Error::ClockDrift {
             last_timestamp_ms: 1_700_000_000_100,
             current_timestamp_ms: 1_700_000_000_000,

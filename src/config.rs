@@ -1,7 +1,6 @@
 // Copyright (c) 2026 erik <erik@erik.xyz> — https://erik.xyz
 
-//! 环境变量配置 —— 对应 PHP 版 `SnowflakeFactory::fromEnvironment()` 与
-//! 各适配器读取的 `SNOWFLAKE_*` 变量（变量名逐一照搬）。
+//! 环境变量配置 —— 部署环境用 `SNOWFLAKE_*` 变量配置生成器。
 //!
 //! | 环境变量 | 配置键 | 默认值 |
 //! |---|---|---|
@@ -16,16 +15,13 @@
 //! | `SNOWFLAKE_CLOCK_DRIFT_STRATEGY` | `clock_drift_strategy` | `throw` |
 //! | `SNOWFLAKE_CLOCK_DRIFT_WAIT_MS` | `clock_drift_wait_ms` | `1000` |
 //!
-//! 与 PHP 版的两处差异，都是 Rust 语言使然：
+//! 两处取值约定：
 //!
-//! - `SNOWFLAKE_SEQUENCE_RESOLVER` 认内置策略名 `sequential` / `random`。
-//!   PHP 收的是类的完整限定名；Rust 不能按名字实例化类型，自定义策略请用
-//!   [`SnowflakeBuilder::sequence_resolver`] 注入。
-//! - 变量值不是合法整数时报 [`Error::InvalidConfig`]；PHP 的 `fromConfig()`
-//!   同样拒绝，但 Laravel 适配器路径上的 `(int)` 转换会把垃圾值静默变 0。
+//! - `SNOWFLAKE_SEQUENCE_RESOLVER` 只认内置策略名 `sequential` / `random`；
+//!   自定义策略请用 [`SnowflakeBuilder::sequence_resolver`] 注入。
+//! - 变量值不是合法整数时报 [`Error::InvalidConfig`]，不静默钳到 0。
 //!
-//! 未设置或去空白后为空的变量一律跳过，落到默认值 —— 与 PHP 版
-//! 「只转发已设置且非空的变量」一致。
+//! 未设置或去空白后为空的变量一律跳过，落到默认值。
 
 use crate::error::{Error, Result};
 use crate::resolvers::{RandomSequenceResolver, SequentialSequenceResolver};
@@ -91,7 +87,11 @@ impl SnowflakeBuilder {
             builder = builder.clock_tolerance_ms(int(&value, "SNOWFLAKE_CLOCK_TOLERANCE_MS")?);
         }
         if let Some(value) = env("SNOWFLAKE_CLOCK_DRIFT_STRATEGY") {
-            builder = builder.clock_drift_strategy(value.trim().parse()?);
+            // 与 SNOWFLAKE_SEQUENCE_RESOLVER 一致：大小写不敏感，报错点名变量。
+            let strategy = value.trim().to_ascii_lowercase().parse().map_err(|e| {
+                Error::InvalidConfig(format!("Config \"SNOWFLAKE_CLOCK_DRIFT_STRATEGY\": {e}"))
+            })?;
+            builder = builder.clock_drift_strategy(strategy);
         }
         if let Some(value) = env("SNOWFLAKE_CLOCK_DRIFT_WAIT_MS") {
             let wait = int(&value, "SNOWFLAKE_CLOCK_DRIFT_WAIT_MS")?;

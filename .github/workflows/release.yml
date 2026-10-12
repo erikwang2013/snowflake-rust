@@ -1,8 +1,13 @@
+# Copyright (c) 2026 erik <erik@erik.xyz> — https://erik.xyz
+
 name: Release
 
 # 推送规则：push 到 main 后，从 Cargo.toml 读取版本号（单一事实来源），
 # 增量补齐缺失的 tag 和 GitHub Release —— 每运行一次只创建尚未存在的版本，
 # 改版本号并推 main 即完成发版。
+#
+# 发布前必须先过 `test` job（测试 / clippy / 声明的 MSRV）—— 红提交不该拿到
+# tag 与 release（与 security-rust 同一取向）。
 #
 # 注意：crates.io 的 `cargo publish` 不在这里做 —— 发布令牌不下发到 CI，
 # 由维护者手动执行（与房子其余项目一致）。
@@ -15,12 +20,41 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
+  # 打 tag 之前的验证关卡：测试、clippy、声明的 MSRV 都过才允许发版。
+  test:
+    name: Pre-release check
+    runs-on: ubuntu-latest
+    # 只读即可（最小权限）
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test --locked --all-features
+      - run: cargo clippy --locked --all-targets --all-features -- -D warnings
+      # 用 Cargo.toml 里声明的 rust-version 再建一次，确保「声明的 MSRV」与
+      # 「源码实际用到的特性」一致（源码用了 1.88 才稳定的 let-chains）。
+      - name: Check declared MSRV
+        run: |
+          MSRV=$(grep -m1 '^rust-version' Cargo.toml | cut -d'"' -f2)
+          echo "声明的 MSRV：${MSRV}"
+          rustup toolchain install "${MSRV}" --profile minimal --no-self-update
+          cargo "+${MSRV}" check --locked --all-targets
+
   release:
     name: Tag & Release
+    needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # 完整历史，避免浅克隆导致 tag 比对失败
           fetch-depth: 0

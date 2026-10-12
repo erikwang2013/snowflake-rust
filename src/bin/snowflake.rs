@@ -7,6 +7,7 @@
 //! snowflake-rust --count 5    发 5 个 ID
 //! snowflake-rust --parse ID   反解一个 ID
 //! snowflake-rust --mascot     只打印宠物
+//! snowflake-rust --version    显示版本
 //! ```
 //!
 //! 生成器配置读 `SNOWFLAKE_*` 环境变量，与库里的 [`snowflake::Snowflake::from_env`]
@@ -22,6 +23,7 @@ const USAGE: &str = "\
   snowflake-rust --count N    发 N 个 ID
   snowflake-rust --parse ID   反解一个 ID
   snowflake-rust --mascot     只打印宠物
+  snowflake-rust --version    显示版本
   snowflake-rust --help       显示本帮助
 
 生成器配置读 SNOWFLAKE_* 环境变量:
@@ -46,6 +48,9 @@ fn run(args: Vec<String>) -> Result<(), String> {
         }
         [flag] if flag == "--mascot" => print_mascot(),
         [flag] if flag == "--help" || flag == "-h" => println!("{USAGE}"),
+        [flag] if flag == "--version" || flag == "-V" => {
+            println!("snowflake-rust {}", env!("CARGO_PKG_VERSION"));
+        }
         [flag, count] if flag == "--count" => {
             let count: usize = count
                 .parse()
@@ -68,7 +73,7 @@ fn run(args: Vec<String>) -> Result<(), String> {
             let parsed = snowflake.parse_id(id);
             println!("id:            {id}");
             println!("timestamp_ms:  {}", parsed.timestamp_ms);
-            println!("datetime:      {} (UTC)", parsed.datetime);
+            println!("datetime:      {} (UTC)", parsed.datetime());
             println!("worker_id:     {}", parsed.worker_id);
             println!("datacenter_id: {}", parsed.datacenter_id);
             println!("sequence:      {}", parsed.sequence);

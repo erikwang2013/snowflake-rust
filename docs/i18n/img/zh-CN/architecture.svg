@@ -96,7 +96,7 @@
 <text x="78.0" y="739" font-size="10.5" fill="#6b7c96" font-weight="400">UTC datetime · 零依赖格式化</text>
 <rect x="353.3" y="694.0" width="273.3" height="58.0" rx="10" fill="#ffffff" stroke="#c3d7ff" stroke-width="1.5"/>
 <text x="367.3333333333333" y="719" font-size="12.5" fill="#0f1e33" font-weight="600">SNOWFLAKE_* 配置</text>
-<text x="367.3333333333333" y="739" font-size="10.5" fill="#6b7c96" font-weight="400">环境变量 · 与 PHP 适配器同名</text>
+<text x="367.3333333333333" y="739" font-size="10.5" fill="#6b7c96" font-weight="400">环境变量 · 构建器的第二入口</text>
 <rect x="642.7" y="694.0" width="273.3" height="58.0" rx="10" fill="#ffffff" stroke="#c3d7ff" stroke-width="1.5"/>
 <text x="656.6666666666666" y="719" font-size="12.5" fill="#0f1e33" font-weight="600">pet 雪花精灵</text>
 <text x="656.6666666666666" y="739" font-size="10.5" fill="#6b7c96" font-weight="400">NAME · TAGLINE · ASCII · SVG</text>
@@ -126,7 +126,7 @@
 <text x="356" y="876" font-size="10.0" fill="#93a3b8" font-weight="600" text-anchor="end">impl</text>
 <rect x="40.0" y="1004.0" width="900.0" height="150.0" rx="14" fill="#fbfcfe" stroke="#dbe6f5" stroke-width="1.4"/>
 <rect x="58.0" y="991.0" width="93.0" height="26.0" rx="13.0" fill="#475569"/><text x="104.5" y="1008.32" font-size="12.0" fill="#fff" font-weight="600" text-anchor="middle">横切关注点</text>
-<text x="64" y="1036" font-size="12.0" fill="#0f1e33" font-weight="700">Error 枚举 — 8 个变体，一一对应 PHP 异常体系</text>
+<text x="64" y="1036" font-size="12.0" fill="#0f1e33" font-weight="700">Error 枚举 — 8 个变体，语义化的错误体系</text>
 <rect x="64.0" y="1048.0" width="73.2" height="22.0" rx="11" fill="#fdeeee"/>
 <text x="100.578" y="1063" font-size="10.5" fill="#dc2626" font-weight="600" text-anchor="middle">ClockDrift</text>
 <rect x="145.2" y="1048.0" width="113.8" height="22.0" rx="11" fill="#fff6e6"/>
@@ -145,10 +145,10 @@
 <text x="455.50874999999996" y="1089" font-size="10.5" fill="#dc2626" font-weight="600" text-anchor="middle">Backend</text>
 <line x1="608.0" y1="1028.0" x2="608.0" y2="1134.0" stroke="#dbe6f5" stroke-width="1.5" stroke-linecap="butt"/>
 <text x="632" y="1036" font-size="12.0" fill="#0f1e33" font-weight="700">配置与装配</text>
-<text x="632" y="1058" font-size="10.0" fill="#3d4d66" font-weight="400">SNOWFLAKE_* 环境变量与 PHP 适配器同名，同一份</text>
-<text x="632" y="1073" font-size="10.0" fill="#3d4d66" font-weight="400">.env 两边可用</text>
-<text x="632" y="1088" font-size="10.0" fill="#3d4d66" font-weight="400">构建器默认值与 PHP 构造函数一致：worker 0 ·</text>
-<text x="632" y="1103" font-size="10.0" fill="#3d4d66" font-weight="400">datacenter 0 · epoch 2024-01-01</text>
+<text x="632" y="1058" font-size="10.0" fill="#3d4d66" font-weight="400">SNOWFLAKE_* 环境变量与构建器一一对应，一套 .env</text>
+<text x="632" y="1073" font-size="10.0" fill="#3d4d66" font-weight="400">即可装配</text>
+<text x="632" y="1088" font-size="10.0" fill="#3d4d66" font-weight="400">构建器默认值：worker 0 · datacenter 0 · epoch</text>
+<text x="632" y="1103" font-size="10.0" fill="#3d4d66" font-weight="400">2024-01-01</text>
 <text x="632" y="1118" font-size="10.0" fill="#3d4d66" font-weight="400">守卫未注册 = 装配错误：各框架翻译成 500，并点名检查</text>
 <text x="632" y="1133" font-size="10.0" fill="#3d4d66" font-weight="400">装配步骤</text>
 <text x="40" y="1222" font-size="11.5" fill="#93a3b8" font-weight="400">© 2026 erik — https://erik.xyz</text><text x="940" y="1222" font-size="11.5" fill="#93a3b8" font-weight="600" text-anchor="end">snowflake-rust</text>

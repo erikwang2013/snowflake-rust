@@ -23,9 +23,10 @@ fn instance_parse_roundtrips_every_component() {
     assert_eq!(parsed.datacenter_id, 3);
     assert!((before..=after).contains(&parsed.timestamp_ms));
     // datetime 是 `YYYY-MM-DD HH:MM:SS.mmm`（23 字符）
-    assert_eq!(parsed.datetime.len(), 23, "datetime: {}", parsed.datetime);
-    assert_eq!(parsed.datetime.as_bytes()[10], b' ');
-    assert_eq!(parsed.datetime.as_bytes()[19], b'.');
+    let datetime = parsed.datetime();
+    assert_eq!(datetime.len(), 23, "datetime: {datetime}");
+    assert_eq!(datetime.as_bytes()[10], b' ');
+    assert_eq!(datetime.as_bytes()[19], b'.');
 }
 
 #[test]
@@ -40,8 +41,8 @@ fn static_parse_equals_instance_parse_on_default_layout() {
 }
 
 #[test]
-fn datetime_is_utc_and_matches_the_php_readme_example() {
-    // PHP README 的示例 ID：2025-01-09 00:00:00.123 UTC
+fn datetime_is_utc() {
+    // 示例 ID：2025-01-09 00:00:00.123 UTC
     let epoch = Snowflake::DEFAULT_EPOCH;
     let timestamp_ms = 1_736_380_800_123i64;
     let id = (timestamp_ms - epoch) << 22; // worker / datacenter / sequence 全 0
@@ -49,7 +50,7 @@ fn datetime_is_utc_and_matches_the_php_readme_example() {
     let parsed = Snowflake::parse(id, epoch);
 
     assert_eq!(parsed.timestamp_ms, timestamp_ms);
-    assert_eq!(parsed.datetime, "2025-01-09 00:00:00.123");
+    assert_eq!(parsed.datetime(), "2025-01-09 00:00:00.123");
     assert_eq!(
         (parsed.worker_id, parsed.datacenter_id, parsed.sequence),
         (0, 0, 0)

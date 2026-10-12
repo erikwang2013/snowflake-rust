@@ -1,17 +1,18 @@
 // Copyright (c) 2026 erik <erik@erik.xyz> — https://erik.xyz
 
-//! 可复现的吞吐基准 —— 对应 PHP 版 `scripts/benchmark.php`。
+//! 可复现的吞吐基准。
 //!
 //! ```bash
 //! cargo run --release --example bench
 //! ```
 //!
-//! 与 PHP 版同样取 best-of-N 并给出裸时钟基线；不同之处在结论：
-//! PHP 是算力先到顶（约 1.6M/s），Rust 的计算速度远超序列号天花板
-//! （默认 12 位序列 = 每毫秒 4096 个 = 4.096M/s），`id()` 实测会贴在天花板上。
+//! 取 best-of-N 并给出裸时钟基线；结论是 `id()` 的计算速度远超序列号天花板
+//! （默认 12 位序列 = 每毫秒 4096 个 = 4.096M/s），实测会贴在天花板上
+//! —— 所以另给一行**不撞顶对照**（epoch 前移 + 宽序列位），
+//! 把纯生成成本与「等槽位」的时间分开量。
 
 use std::hint::black_box;
-use std::time::{Duration, Instant, SystemTime};
+use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use snowflake::{Snowflake, SnowflakeBuilder};
 
@@ -53,6 +54,25 @@ fn main() {
         }),
     );
 
+    // 不撞顶的对照：epoch 拨到 60 秒前、序列位开到 20 位（每毫秒 104 万槽位，
+    // 30 万次迭代用不完；时间戳剩 33 位 ≈ 99 天）。这一行量的才是纯生成的
+    // ns/op —— 上面那行量的是序列槽位天花板。
+    let now_ms = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_millis() as i64;
+    let mut snowflake = SnowflakeBuilder::new()
+        .epoch(now_ms - 60_000)
+        .sequence_bits(20)
+        .build()
+        .unwrap();
+    report(
+        "id() —— 不撞顶对照（20 位序列）",
+        rounds(|| {
+            black_box(snowflake.id().unwrap());
+        }),
+    );
+
     let mut snowflake = Snowflake::default();
     report(
         "id() + parse_id()",
@@ -67,7 +87,10 @@ fn main() {
         "\n序列号天花板：每毫秒 {per_ms} 个 → {:.3}M/s，这是 id() 的物理上限；",
         per_ms as f64 * 1_000.0 / 1_000_000.0
     );
-    println!("贴顶说明发号侧已无优化空间，解析与构造才是可比较的计算量。");
+    println!(
+        "默认布局那行贴的正是这个天花板（时间花在等下一毫秒的槽位）；\n\
+         不撞顶对照行量的才是纯生成成本，两者之差就是「等槽位」的占比。"
+    );
 }
 
 /// 跑 ROUNDS 轮，每轮 ITERATIONS 次。

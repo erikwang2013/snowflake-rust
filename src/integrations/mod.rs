@@ -121,33 +121,92 @@ pub mod warp;
 /// `Filter`/`Controller`/`Context` 链路，但那套**没有**接到 `Router` 上 ——
 /// 框架自己的示例与 admin 项目走的都是 `Router` + axum handler。所以这里提供
 /// 的是 `Router` 路径的适配，`Filter` 路径要拿守卫得自己从 `Context` 里取。
+///
+/// ```
+/// use bee_router::Router;
+/// use snowflake::guard::Guard;
+/// use snowflake::integrations::Guarded;
+/// use snowflake::Snowflake;
+///
+/// #[derive(Clone)]
+/// struct AppState { snowflake: Guard }
+/// impl Guarded for AppState {
+///     fn guard(&self) -> &Guard { &self.snowflake }
+/// }
+///
+/// async fn create_order(guard: Guard) -> String {
+///     guard.id().map(|id| id.to_string()).unwrap_or_default()
+/// }
+///
+/// let app = Router::new()
+///     .ns("/api/v1", |ns| ns.get("/orders", create_order))
+///     .with_state(AppState { snowflake: Guard::new(Snowflake::default()) });
+/// # let _ = app;
+/// ```
 #[cfg(feature = "bee-rust")]
 pub mod bee_rust {
     pub use super::Guarded;
     pub use super::axum::GuardExtractor;
 
-    /// bee-rust 集成的用法要点（示例不参与编译，bee 的路由构造需要真实状态）。
-    ///
-    /// ```text
-    /// use snowflake::guard::Guard;
-    /// use snowflake::integrations::Guarded;
-    /// use bee_router::Router;
-    ///
-    /// #[derive(Clone)]
-    /// struct AppState { snowflake: Guard }
-    /// impl Guarded for AppState {
-    ///     fn guard(&self) -> &Guard { &self.snowflake }
-    /// }
-    ///
-    /// async fn create_order(guard: Guard) -> String {
-    ///     guard.id().map(|id| id.to_string()).unwrap_or_default()
-    /// }
-    ///
-    /// let app = Router::new()
-    ///     .ns("/api/v1", |ns| ns.get("/orders", create_order))
-    ///     .with_state(AppState { snowflake: guard });
-    /// ```
-    pub const USAGE: &str = "见本模块文档";
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+        use crate::Snowflake;
+        use crate::guard::Guard;
+        use axum::body::Body;
+        use axum::http::{Request, StatusCode};
+        use bee_router::Router;
+        use tower::ServiceExt as _;
+
+        #[derive(Clone)]
+        struct AppState {
+            snowflake: Guard,
+        }
+
+        impl Guarded for AppState {
+            fn guard(&self) -> &Guard {
+                &self.snowflake
+            }
+        }
+
+        async fn create_order(guard: Guard) -> String {
+            guard.id().unwrap().to_string()
+        }
+
+        /// 端到端：bee_router 的 `Router` 把 Guard 交到 axum handler 手里，
+        /// 拿到的与注册进状态的必须是同一个发号器。
+        #[tokio::test]
+        async fn router_serves_the_guard_to_axum_handlers() {
+            let state = AppState {
+                snowflake: Guard::new(Snowflake::default()),
+            };
+            let previous = state.snowflake.id().unwrap();
+
+            let app = Router::new()
+                .ns("/api/v1", |ns| ns.get("/orders", create_order))
+                .with_state(state);
+
+            let response = app
+                .oneshot(
+                    Request::builder()
+                        .uri("/api/v1/orders")
+                        .body(Body::empty())
+                        .unwrap(),
+                )
+                .await
+                .unwrap();
+            assert_eq!(response.status(), StatusCode::OK);
+
+            let body = axum::body::to_bytes(response.into_body(), 1024)
+                .await
+                .unwrap();
+            let id: i64 = std::str::from_utf8(&body).unwrap().parse().unwrap();
+            assert!(
+                id > previous,
+                "处理器与状态不是同一个发号器: {id} <= {previous}"
+            );
+        }
+    }
 }
 
 #[cfg(feature = "ecat")]

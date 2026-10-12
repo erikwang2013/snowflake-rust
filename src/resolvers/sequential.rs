@@ -1,6 +1,6 @@
 // Copyright (c) 2026 erik <erik@erik.xyz> — https://erik.xyz
 
-//! 顺序序列号策略（默认）—— 对应 `SequentialSequenceResolver`。
+//! 顺序序列号策略（默认）。
 
 use crate::error::Result;
 use crate::resolver::SequenceResolver;
@@ -20,7 +20,7 @@ impl SequentialSequenceResolver {
     /// 新建策略，游标为空。
     pub fn new() -> Self {
         Self {
-            // PHP 版以 PHP_INT_MIN 作哨兵；这里同理，任何真实偏移都不会与之相等。
+            // i64::MIN 作哨兵：任何真实的时间戳偏移都不会与之相等。
             last_timestamp: i64::MIN,
             sequence: 0,
         }

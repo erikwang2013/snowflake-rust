@@ -29,7 +29,8 @@ fn drifted(strategy: ClockDriftStrategy, tolerance_ms: i64, wait_ms: i64) -> Sno
         .clock_drift_wait_ms(wait_ms)
         .build()
         .unwrap();
-    s.last_timestamp = Snowflake::current_time_millis() + 50;
+    // 未来 5 秒：比任何一次调度停顿都大，测试不会因为线程被挂起而「回拨消失」。
+    s.last_timestamp = Snowflake::current_time_millis() + 5_000;
 
     s
 }
@@ -113,7 +114,7 @@ fn sequence_exhaustion_waits_for_next_millisecond() {
     let first = s.id().unwrap();
     assert_eq!(s.parse_id(first).sequence, 3);
 
-    s.last_timestamp = Snowflake::current_time_millis() + 100;
+    s.last_timestamp = Snowflake::current_time_millis() + 1_000;
     // 第二次调用：timestamp 必等于 last（容忍窗口内沿用）→ 策略给 None
     // → 核心等到下一毫秒重试 → 剧本给 9。
     let second = s.id().unwrap();
@@ -128,10 +129,43 @@ fn always_exhausted_resolver_surfaces_sequence_unavailable() {
         .build()
         .unwrap();
 
-    // 首次调用时间戳就与 last 不同，没有「下一毫秒重试」可走 —— 直接报错。
+    // 契约是「等到下一毫秒重试一次」—— 这里策略永远给 None，重试一次之后
+    // 仍拿不到，才报 SequenceUnavailable。
     assert!(matches!(s.id(), Err(Error::SequenceUnavailable)));
     // 状态未被毒化
     assert!(matches!(s.id(), Err(Error::SequenceUnavailable)));
+}
+
+#[test]
+fn huge_wait_budget_saturates_instead_of_overflowing() {
+    // i64::MAX 的等待预算 + debug 构建：修复前 deadline 的加法在这里会 panic
+    // （release 下回绕成负值、立刻放弃等待）。saturating_add 后语义 = 一直等到追平。
+    let mut s = SnowflakeBuilder::new()
+        .clock_drift_strategy(ClockDriftStrategy::Wait)
+        .clock_drift_wait_ms(i64::MAX)
+        .build()
+        .unwrap();
+    let target = Snowflake::current_time_millis() + 300;
+    s.last_timestamp = target;
+
+    let id = s.id().unwrap();
+
+    assert!(s.parse_id(id).timestamp_ms >= target);
+}
+
+#[test]
+fn resolver_none_on_a_fresh_millisecond_also_retries_next_millisecond() {
+    // Redis 这类共享计数器：本进程在这一毫秒的**首次**调用就可能拿到 None
+    // （同节点其他进程已把这一毫秒用尽）。「timestamp == last_timestamp」
+    // 从来不是契约的一部分 —— 拿到 None 一律等到下一毫秒重试一次。
+    let mut s = SnowflakeBuilder::new()
+        .sequence_resolver(ScriptedResolver::new([None, Some(5)]))
+        .build()
+        .unwrap();
+
+    let id = s.id().unwrap();
+
+    assert_eq!(s.parse_id(id).sequence, 5);
 }
 
 #[test]

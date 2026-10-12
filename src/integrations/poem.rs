@@ -72,11 +72,9 @@ mod tests {
     #[tokio::test]
     async fn missing_data_is_a_500() {
         let req = Request::builder().finish();
-        // 不用 unwrap_err()：它要求 Ok 侧（Guard）实现 Debug，而 Guard 故意没有
-        match extract(&req).await {
-            Err(err) => assert_eq!(err.status(), StatusCode::INTERNAL_SERVER_ERROR),
-            Ok(_) => panic!("没注册 data 时应当报错"),
-        }
+        let err = extract(&req).await.unwrap_err();
+
+        assert_eq!(err.status(), StatusCode::INTERNAL_SERVER_ERROR);
     }
 
     /// 处理器拿到的与注册进去的是同一个发号器：同一实例严格单调。

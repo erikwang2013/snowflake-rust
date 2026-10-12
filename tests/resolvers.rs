@@ -7,7 +7,7 @@ use std::collections::{HashSet, VecDeque};
 use snowflake::resolvers::{RandomSequenceResolver, SequentialSequenceResolver};
 use snowflake::{Error, Result, SequenceResolver, SnowflakeBuilder};
 
-/// 按剧本吐值的策略（对应 PHP 测试套件的 FixedSequenceResolver）：
+/// 按剧本吐值的策略：
 /// 驱动确定性路径 —— 包括「本毫秒用尽 → 下一毫秒重试」。
 struct ScriptedResolver(VecDeque<Option<i64>>);
 

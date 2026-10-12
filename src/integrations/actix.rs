@@ -89,11 +89,10 @@ mod tests {
     #[actix_web::test]
     async fn missing_app_data_is_a_500() {
         let req = test::TestRequest::default().to_http_request();
-        // 不用 unwrap_err()：它要求 Ok 侧（Guard）实现 Debug，而 Guard 故意没有
-        let err = match Guard::from_request(&req, &mut Payload::None).await {
-            Err(err) => err,
-            Ok(_) => panic!("没注册 app_data 时应当报错"),
-        };
+        let err = Guard::from_request(&req, &mut Payload::None)
+            .await
+            .unwrap_err();
+
         assert_eq!(
             err.as_response_error().status_code(),
             actix_web::http::StatusCode::INTERNAL_SERVER_ERROR

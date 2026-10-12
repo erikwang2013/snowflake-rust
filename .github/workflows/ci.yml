@@ -1,66 +1,104 @@
-name: CI
+# Copyright (c) 2026 erik <erik@erik.xyz> — https://erik.xyz
+#
+# 每次推送到 main 与每个 PR 都跑一遍。分两层：
+#   ① 核心（fmt / clippy / test / docs / msrv / package）—— 单跑；
+#   ② 矩阵（每个 opt-in feature 各一个 job）—— 集成层的编译与测试，并行跑。
+#
+# 之所以把框架拆成矩阵而不是只跑 `--all-features`：八个框架的依赖树彼此独立，
+# 全开到一个 job 里既慢，feature 并集还可能掩盖「单独开某个 feature 编不过」的问题。
 
-# 与房子（druid-rust / apidoc-rust）的活动一致，另加两件本库特有的事：
-#   * 集成层全是 opt-in feature，核心构建一个都不拉 —— 所以测试与 clippy 跑
-#     --all-features，并且单开一个矩阵逐 feature 编译，防止某个适配层悄悄失效；
-#   * fmt 作为门禁（房子 CI 里的固定项）。
+name: CI
 
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
 
+# 默认 token 只读（需要 contents: write 的是 release.yml）。
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  check:
-    name: Check
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - run: cargo check
-
-  test:
-    name: Test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - run: cargo test --all-features
-
-  clippy:
-    name: Clippy
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy
-      - run: cargo clippy --all-features --all-targets -- -D warnings
-
   fmt:
-    name: Format
+    name: Fmt
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
       - run: cargo fmt --all -- --check
 
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo clippy --locked --all-targets --all-features -- -D warnings
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      # Cargo.lock 已提交 —— 全部命令加 `--locked`：lock 没跟着改会在 CI 变红，
+      # 而不是静默重新解析依赖。
+      - run: cargo test --locked
+      - run: cargo test --locked --all-features
+
   docs:
     name: Docs
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
-      # missing_docs / broken_intra_doc_links 是 deny 门禁，文档构建即校验
-      - run: cargo doc --all-features --no-deps
+      - uses: Swatinem/rust-cache@v2
+      # missing_docs / broken_intra_doc_links 是 deny 门禁，`-D warnings`
+      # 让 rustdoc 的全部告警也变成硬失败。
+      - run: cargo doc --locked --no-deps --all-features
         env:
           RUSTDOCFLAGS: -D warnings
+
+  msrv:
+    name: MSRV 1.88
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      # Cargo.toml 声明了 rust-version = "1.88"，那就真的验一次
+      # （源码用了 1.88 才稳定的 let-chains）—— 否则「支持 1.88」只是一句话。
+      #
+      # 刻意**不带** `--all-features`：可选框架依赖各带各的 MSRV、由上游自行
+      # 决定，那不属于本 crate 的 1.88 承诺；八个 feature 的编译验证由下面的
+      # Feature 矩阵与 Clippy（stable、all-features）负责。
+      - uses: dtolnay/rust-toolchain@1.88
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo check --locked --all-targets
+
+  package:
+    name: Package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      # 打好的包必须自身能编译 —— 这就是 crates.io 上会发生的事；
+      # docs/pet.svg 被 include_str! 在编译期读取，被 exclude 漏发会当场暴露。
+      - run: cargo publish --dry-run --locked
 
   features:
     name: Feature ${{ matrix.feature }}
@@ -70,6 +108,10 @@ jobs:
       matrix:
         feature: [axum, actix-web, rocket, poem, salvo, warp, bee-rust, ecat]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
-      - run: cargo check --no-default-features --features ${{ matrix.feature }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.feature }}
+      # 逐 feature 跑测试而不仅是 check：矩阵里每个组合都是用户真实可能的用法。
+      - run: cargo test --locked --no-default-features --features ${{ matrix.feature }}

@@ -6,12 +6,15 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
 use snowflake::resolvers::{RedisClient, RedisSequenceResolver};
-use snowflake::{Result, SequenceResolver, SnowflakeBuilder};
+use snowflake::{Error, Result, SequenceResolver, SnowflakeBuilder};
 
 #[derive(Default)]
 struct FakeState {
     counters: HashMap<String, i64>,
     expires: Vec<(String, u64)>,
+    expire_attempts: usize,
+    /// 还剩几次 EXPIRE 要人为失败（每次失败自减）。
+    fail_expire_times: usize,
 }
 
 /// 假客户端：多个解析器共享同一份状态 —— 模拟多进程共用一组节点 ID。
@@ -19,8 +22,20 @@ struct FakeState {
 struct FakeRedis(Arc<Mutex<FakeState>>);
 
 impl FakeRedis {
+    /// 前 `times` 次 EXPIRE 返回 `Err`。
+    fn with_expire_failures(times: usize) -> Self {
+        let redis = Self::default();
+        redis.0.lock().unwrap().fail_expire_times = times;
+        redis
+    }
+
     fn expires(&self) -> Vec<(String, u64)> {
         self.0.lock().unwrap().expires.clone()
+    }
+
+    /// EXPIRE 被调用的总次数（含失败）。
+    fn expire_attempts(&self) -> usize {
+        self.0.lock().unwrap().expire_attempts
     }
 }
 
@@ -34,12 +49,15 @@ impl RedisClient for FakeRedis {
     }
 
     fn expire(&mut self, key: &str, seconds: u64) -> Result<()> {
-        self.0
-            .lock()
-            .unwrap()
-            .expires
-            .push((key.to_string(), seconds));
+        let mut state = self.0.lock().unwrap();
+        state.expire_attempts += 1;
 
+        if state.fail_expire_times > 0 {
+            state.fail_expire_times -= 1;
+            return Err(Error::Backend("EXPIRE 失败".to_string()));
+        }
+
+        state.expires.push((key.to_string(), seconds));
         Ok(())
     }
 }
@@ -73,6 +91,24 @@ fn ttl_is_armed_once_per_key_with_defaults() {
     resolver.next(100, 3).unwrap();
 
     assert_eq!(redis.expires(), vec![("snowflake:seq:100".to_string(), 1)]);
+}
+
+#[test]
+fn expire_failure_is_retried_on_the_next_call() {
+    let redis = FakeRedis::with_expire_failures(1);
+    let mut resolver = RedisSequenceResolver::new(redis.clone());
+
+    // 第 1 次：INCR 成功但 EXPIRE 失败 → fail-closed，不能发出没设 TTL 的序号。
+    assert!(resolver.next(100, 3).is_err());
+    assert_eq!(redis.expire_attempts(), 1);
+
+    // 第 2 次（同一毫秒）：补发 EXPIRE 成功 → 清除记忆，正常返回序号。
+    assert_eq!(resolver.next(100, 3).unwrap(), Some(1));
+    assert_eq!(redis.expire_attempts(), 2);
+
+    // 第 3 次：pending 已清，不再有新的 EXPIRE 尝试。
+    assert_eq!(resolver.next(100, 3).unwrap(), Some(2));
+    assert_eq!(redis.expire_attempts(), 2);
 }
 
 #[test]

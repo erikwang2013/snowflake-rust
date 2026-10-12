@@ -96,7 +96,7 @@
 <text x="78.0" y="739" font-size="10.5" fill="#6b7c96" font-weight="400">UTC datetime · zero-dependency formatting</text>
 <rect x="353.3" y="694.0" width="273.3" height="58.0" rx="10" fill="#ffffff" stroke="#c3d7ff" stroke-width="1.5"/>
 <text x="367.3333333333333" y="719" font-size="12.5" fill="#0f1e33" font-weight="600">SNOWFLAKE_* config</text>
-<text x="367.3333333333333" y="739" font-size="10.5" fill="#6b7c96" font-weight="400">env vars · same names as the PHP adapters</text>
+<text x="367.3333333333333" y="739" font-size="10.5" fill="#6b7c96" font-weight="400">env vars · the builder&#x27;s second entry</text>
 <rect x="642.7" y="694.0" width="273.3" height="58.0" rx="10" fill="#ffffff" stroke="#c3d7ff" stroke-width="1.5"/>
 <text x="656.6666666666666" y="719" font-size="12.5" fill="#0f1e33" font-weight="600">pet — snowflake sprite</text>
 <text x="656.6666666666666" y="739" font-size="10.5" fill="#6b7c96" font-weight="400">NAME · TAGLINE · ASCII · SVG</text>
@@ -126,7 +126,7 @@
 <text x="356" y="876" font-size="10.0" fill="#93a3b8" font-weight="600" text-anchor="end">impl</text>
 <rect x="40.0" y="1004.0" width="900.0" height="150.0" rx="14" fill="#fbfcfe" stroke="#dbe6f5" stroke-width="1.4"/>
 <rect x="58.0" y="991.0" width="110.0" height="26.0" rx="13.0" fill="#475569"/><text x="113.005" y="1008.32" font-size="12.0" fill="#fff" font-weight="600" text-anchor="middle">Cross-cutting</text>
-<text x="64" y="1036" font-size="12.0" fill="#0f1e33" font-weight="700">Error enum — 8 variants, one per PHP exception</text>
+<text x="64" y="1036" font-size="12.0" fill="#0f1e33" font-weight="700">Error enum — 8 variants, a semantic error hierarchy</text>
 <rect x="64.0" y="1048.0" width="73.2" height="22.0" rx="11" fill="#fdeeee"/>
 <text x="100.578" y="1063" font-size="10.5" fill="#dc2626" font-weight="600" text-anchor="middle">ClockDrift</text>
 <rect x="145.2" y="1048.0" width="113.8" height="22.0" rx="11" fill="#fff6e6"/>
@@ -145,10 +145,10 @@
 <text x="455.50874999999996" y="1089" font-size="10.5" fill="#dc2626" font-weight="600" text-anchor="middle">Backend</text>
 <line x1="608.0" y1="1028.0" x2="608.0" y2="1134.0" stroke="#dbe6f5" stroke-width="1.5" stroke-linecap="butt"/>
 <text x="632" y="1036" font-size="12.0" fill="#0f1e33" font-weight="700">Config &amp; wiring</text>
-<text x="632" y="1058" font-size="10.0" fill="#3d4d66" font-weight="400">SNOWFLAKE_* env vars share their names with the</text>
-<text x="632" y="1073" font-size="10.0" fill="#3d4d66" font-weight="400">PHP adapters; one .env works on both sides</text>
-<text x="632" y="1088" font-size="10.0" fill="#3d4d66" font-weight="400">builder defaults match the PHP constructor: worker 0</text>
-<text x="632" y="1103" font-size="10.0" fill="#3d4d66" font-weight="400">· datacenter 0 · epoch 2024-01-01</text>
+<text x="632" y="1058" font-size="10.0" fill="#3d4d66" font-weight="400">SNOWFLAKE_* env vars mirror the builder keys;</text>
+<text x="632" y="1073" font-size="10.0" fill="#3d4d66" font-weight="400">one .env wires everything</text>
+<text x="632" y="1088" font-size="10.0" fill="#3d4d66" font-weight="400">builder defaults: worker 0 · datacenter 0 · epoch</text>
+<text x="632" y="1103" font-size="10.0" fill="#3d4d66" font-weight="400">2024-01-01</text>
 <text x="632" y="1118" font-size="10.0" fill="#3d4d66" font-weight="400">a missing guard registration is a wiring bug: each</text>
 <text x="632" y="1133" font-size="10.0" fill="#3d4d66" font-weight="400">framework turns it into a 500 and names the step to</text>
 <text x="632" y="1148" font-size="10.0" fill="#3d4d66" font-weight="400">check</text>

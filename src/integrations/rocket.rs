@@ -68,7 +68,7 @@ mod tests {
     }
 
     #[get("/next")]
-    fn next_id_route(guard: Guard) -> String {
+    fn id_route(guard: Guard) -> String {
         guard.id().unwrap().to_string()
     }
 
@@ -82,7 +82,7 @@ mod tests {
     fn guard_is_injectable_end_to_end() {
         let rocket = rocket::build()
             .manage(guard())
-            .mount("/", routes![next_id_route, parse_route]);
+            .mount("/", routes![id_route, parse_route]);
         let client = Client::tracked(rocket).expect("rocket 应当能启动");
 
         let res = client.get("/next").dispatch();
@@ -111,7 +111,7 @@ mod tests {
     /// 忘了 `manage(...)` 时是 500，不是 panic。
     #[test]
     fn missing_managed_state_is_a_500() {
-        let rocket = rocket::build().mount("/", routes![next_id_route]);
+        let rocket = rocket::build().mount("/", routes![id_route]);
         let client = Client::tracked(rocket).expect("rocket 应当能启动");
 
         let res = client.get("/next").dispatch();

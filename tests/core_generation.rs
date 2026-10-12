@@ -25,16 +25,6 @@ fn generates_unique_strictly_increasing_ids() {
 }
 
 #[test]
-fn next_id_is_an_alias_of_id() {
-    let mut snowflake = Snowflake::default();
-
-    let first = snowflake.id().unwrap();
-    let second = snowflake.next_id().unwrap();
-
-    assert!(second > first);
-}
-
-#[test]
 fn separate_nodes_never_collide() {
     let mut worker_one = Snowflake::builder().worker_id(1).build().unwrap();
     let mut worker_two = Snowflake::builder().worker_id(2).build().unwrap();

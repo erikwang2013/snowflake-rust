@@ -1,6 +1,6 @@
 // Copyright (c) 2026 erik <erik@erik.xyz> — https://erik.xyz
 
-//! 序列号策略契约 —— 核心的扩展点，对应 PHP 版的 `Contracts\SequenceResolver`。
+//! 序列号策略契约 —— 核心的扩展点。
 //!
 //! 核心把每个毫秒的序列号分配完全委托给该 trait，因此更换策略
 //! （顺序 / 随机 / Redis / 自定义）无需改动生成器本身。

@@ -1,6 +1,6 @@
 // Copyright (c) 2026 erik <erik@erik.xyz> — https://erik.xyz
 
-//! 无需框架的完整可运行示例 —— 对应 PHP 版 `docs/examples/plain-php.php`。
+//! 无需框架的完整可运行示例。
 //!
 //! ```bash
 //! cargo run --example quickstart
@@ -17,13 +17,13 @@ fn main() -> Result<(), snowflake::Error> {
     let parsed = snowflake.parse_id(id);
     println!("默认实例");
     println!("  id:            {id}");
-    println!("  datetime(UTC): {}", parsed.datetime);
+    println!("  datetime(UTC): {}", parsed.datetime());
     println!(
         "  worker={} datacenter={} sequence={}",
         parsed.worker_id, parsed.datacenter_id, parsed.sequence
     );
 
-    // 2. 部署配置：走 SNOWFLAKE_* 环境变量（与 PHP 适配器同一套变量名）。
+    // 2. 部署配置：走 SNOWFLAKE_* 环境变量。
     let from_env = Snowflake::from_env()?;
     println!(
         "\nfrom_env: worker={} datacenter={}（SNOWFLAKE_WORKER_ID / SNOWFLAKE_DATACENTER_ID）",

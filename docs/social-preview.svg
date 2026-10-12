@@ -28,13 +28,13 @@
 <text x="648" y="228" font-size="66.0" fill="#0f1e33" font-weight="700" letter-spacing="-1">Snowflake Rust</text>
 <text x="650" y="276" font-size="26.0" fill="#3d4d66" font-weight="400">64 位 · k-ordered · 全局唯一的分布式 ID 生成器</text>
 <text x="650" y="316" font-size="21.0" fill="#6b7c96" font-weight="400">64-bit distributed unique ID generator</text>
-<text x="650" y="346" font-size="21.0" fill="#6b7c96" font-weight="400">pure std · zero-dependency core · ported from snowflake-php</text>
+<text x="650" y="346" font-size="21.0" fill="#6b7c96" font-weight="400">pure std · zero-dependency core · no async runtime</text>
 <rect x="648.0" y="388.0" width="160.0" height="38.0" rx="19" fill="#e9f7f3"/>
 <text x="728.0" y="413" font-size="16.0" fill="#0f766e" font-weight="600" text-anchor="middle">纯 std · 零依赖</text>
 <rect x="822.0" y="388.0" width="120.5" height="38.0" rx="19" fill="#f4efff"/>
 <text x="882.26" y="413" font-size="16.0" fill="#6d28d9" font-weight="600" text-anchor="middle">8 框架集成</text>
 <rect x="956.5" y="388.0" width="114.1" height="38.0" rx="19" fill="#e8f7fb"/>
-<text x="1013.588" y="413" font-size="16.0" fill="#0e7490" font-weight="600" text-anchor="middle">89 项测试</text>
+<text x="1013.588" y="413" font-size="16.0" fill="#0e7490" font-weight="600" text-anchor="middle">96 项测试</text>
 <rect x="1084.7" y="388.0" width="117.2" height="38.0" rx="19" fill="#fff6e6"/>
 <text x="1143.2359999999999" y="413" font-size="16.0" fill="#b45309" font-weight="600" text-anchor="middle">4.1M ID/s</text>
 <line x1="648.0" y1="512.0" x2="1220.0" y2="512.0" stroke="#e8eefa" stroke-width="1.5" stroke-linecap="butt"/>

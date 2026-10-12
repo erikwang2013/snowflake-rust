@@ -90,11 +90,22 @@ mod tests {
     fn missing_depot_entry_is_an_error() {
         let mut depot = Depot::new();
         let mut req = Request::new();
-        // 不用 unwrap_err()：它要求 Ok 侧（Guard）实现 Debug，而 Guard 故意没有
-        match futures_lite_block_on(Guard::extract(&mut req, &mut depot)) {
-            Err(err) => assert_eq!(err, GuardNotConfigured),
-            Ok(_) => panic!("没 inject 时应当报错"),
-        }
+        let err = futures_lite_block_on(Guard::extract(&mut req, &mut depot)).unwrap_err();
+
+        assert_eq!(err, GuardNotConfigured);
+    }
+
+    /// 装配错误的最后一段机制：`GuardNotConfigured` 作为 salvo 的 `Writer`
+    /// 直接渲染成 500 响应（actix / rocket / poem 都有对应测试，salvo 之前缺这条）。
+    #[test]
+    fn guard_not_configured_renders_as_500() {
+        let mut req = Request::new();
+        let mut depot = Depot::new();
+        let mut res = Response::new();
+
+        futures_lite_block_on(GuardNotConfigured.write(&mut req, &mut depot, &mut res));
+
+        assert_eq!(res.status_code, Some(StatusCode::INTERNAL_SERVER_ERROR));
     }
 
     /// 处理器拿到的与注册进去的是同一个发号器：同一实例严格单调。

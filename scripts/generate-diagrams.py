@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 """Generate the snowflake-rust README diagrams.
 
-移植自 snowflake-php 的 scripts/generate-diagrams.py：原语与排版度量原样保留，
-架构图/功能图/周期图的文案与结构按 Rust 现实重写，另加一张“请求周期”图。
+架构图 / 功能图 / ID 生命周期图与请求周期图的生成器：原语与排版度量都在
+本文件内自实现，各图文案与结构按本库现实编写。
 
 Reads every label table in scripts/i18n/labels.<lang>.json and writes
 docs/i18n/img/<lang>/{architecture,features,lifecycle,request-cycle}.svg
@@ -657,10 +657,10 @@ def social_preview():
     body.append(text(X, 228, "Snowflake Rust", 66, INK, "700", spacing="-1"))
     body.append(text(X + 2, 276, "64 位 · k-ordered · 全局唯一的分布式 ID 生成器", 26, BODY))
     body.append(text(X + 2, 316, "64-bit distributed unique ID generator", 21, MUTED))
-    body.append(text(X + 2, 346, "pure std · zero-dependency core · ported from snowflake-php", 21, MUTED))
+    body.append(text(X + 2, 346, "pure std · zero-dependency core · no async runtime", 21, MUTED))
 
     chips = [("纯 std · 零依赖", GREEN, GREEN_T), ("8 框架集成", VIOLET, VIOLET_T),
-             ("89 项测试", CYAN, CYAN_T), ("4.1M ID/s", AMBER, AMBER_T)]
+             ("96 项测试", CYAN, CYAN_T), ("4.1M ID/s", AMBER, AMBER_T)]
     cx = X
     for label, color, tint in chips:
         w = tw(label, 16, "600") + 34
