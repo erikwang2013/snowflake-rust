@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 320 340" width="320" height="340" role="img" aria-label="雪花精灵 · 卖萌 Cute"><title>雪花精灵 · 卖萌 Cute</title><desc>雪花精灵 的 卖萌 表情形态 · animated expression form</desc><style>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 320 340" width="88" height="93.5" role="img" aria-label="雪花精灵 · 卖萌 Cute"><title>雪花精灵 · 卖萌 Cute</title><desc>雪花精灵 的 卖萌 表情形态 · animated expression form</desc><style>
 .ex-motion { animation: ex-hop 1.5s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 50%; }
 .ex-anim-tear { animation: ex-tear 1.8s ease-in infinite; transform-box: fill-box; transform-origin: center; }
 .ex-anim-sweat { animation: ex-tear 1.5s ease-in infinite; transform-box: fill-box; transform-origin: center; }

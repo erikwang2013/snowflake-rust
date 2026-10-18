@@ -2,11 +2,9 @@
 
 # Snowflake Rust
 
-<p align="center">
-  <img src="../../docs/pet.svg" width="180" alt="Snowflake Rust project mascot — a smiling snowflake sprite" />
-  <br />
-  <sub>The mascot ships with the code too — <code>println!("{}", snowflake::pet::ASCII);</code> prints it in any terminal.</sub>
-</p>
+![Snowflake Rust project mascot — a smiling snowflake sprite](../../docs/pet.svg)
+
+*The mascot ships with the code too — `println!("{}", snowflake::pet::ASCII);` prints it in any terminal.*
 
 A distributed unique ID generator based on Twitter's Snowflake algorithm: 64-bit, k-ordered, globally unique, **pure Rust std, truly zero dependencies**. The core, the mascot, the docs, the examples and the benchmark all live in one self-contained repository.
 
@@ -28,7 +26,7 @@ Key features:
 
 ## Project Mascot: the Snowflake Sprite
 
-<img src="../../docs/pet.svg" alt="The snowflake sprite — the snowflake-rust project mascot" width="340">
+![The snowflake sprite — the snowflake-rust project mascot](../../docs/pet.svg)
 
 A smiling snowflake. The character design comes from this library's own bit layout — **the six arms are the segments carved out of the 64 bits, and the center is the timestamp**. It is this library's mascot: `docs/pet.svg` is the original artwork, and the name plate bears the project name.
 
@@ -509,7 +507,7 @@ It prints ops/sec and ns/op against a bare clock call as the baseline, best-of-N
 
 | WeChat Pay | Alipay |
 |:---:|:---:|
-| <img src="../../docs/weixinpay.png" width="130" height="130" alt="WeChat Pay" /> | <img src="../../docs/alipay.png" width="130" height="130" alt="Alipay" /> |
+| ![WeChat Pay](../../docs/weixinpay.png) | ![Alipay](../../docs/alipay.png) |
 
 > If this project helps you, feel free to show your support~
 
