@@ -114,7 +114,7 @@
   "feat.c8.desc": "id() 需要 &mut self：跨线程共享实例编译不过；共享走 Shared / Guard，锁内没有 .await。",
   "feat.c8.tag": "Shared · Arc<Mutex<…>>",
   "feat.c9": "质量与交付",
-  "feat.c9.desc": "96 项测试（8 线程并发唯一性、回拨三态、Redis 假客户端）、可复现基准、中英双语文档与项目宠物。",
+  "feat.c9.desc": "97 项测试（8 线程并发唯一性、回拨三态、Redis 假客户端）、可复现基准、中英双语文档与项目宠物。",
   "feat.c9.tag": "cargo test · bench",
   "feat.footer": "运行环境：Rust >= 1.88（edition 2024） · 任意平台（i64） · 每进程一份实例状态，跨线程共享请用 Shared / Guard",
   "life.title": "ID 生命周期",

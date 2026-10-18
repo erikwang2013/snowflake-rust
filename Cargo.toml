@@ -17,8 +17,8 @@ keywords = ["snowflake", "distributed", "id-generator", "unique-id", "twitter-sn
 categories = ["algorithms", "concurrency"]
 readme = "README.md"
 
-# 随包只发「读代码 / 用库」要用的东西。docs/pet.svg 绝不能排 ——
-# src/pet.rs 用 include_str! 内联它，排掉就编译不过（cargo package 会当场报错，不会静默漏发）。
+# 随包只发「读代码 / 用库」要用的东西。docs/pet.svg 与 docs/pet-expressions/ 绝不能排 ——
+# src/pet.rs 用 include_str! 内联它们，排掉就编译不过（cargo package 会当场报错，不会静默漏发）。
 exclude = [
     "CLAUDE.md",   # 仓库的 agent 配置，与使用者无关
     "AGENTS.md",

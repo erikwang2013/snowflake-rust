@@ -660,7 +660,7 @@ def social_preview():
     body.append(text(X + 2, 346, "pure std · zero-dependency core · no async runtime", 21, MUTED))
 
     chips = [("纯 std · 零依赖", GREEN, GREEN_T), ("8 框架集成", VIOLET, VIOLET_T),
-             ("96 项测试", CYAN, CYAN_T), ("4.1M ID/s", AMBER, AMBER_T)]
+             ("97 项测试", CYAN, CYAN_T), ("4.1M ID/s", AMBER, AMBER_T)]
     cx = X
     for label, color, tint in chips:
         w = tw(label, 16, "600") + 34

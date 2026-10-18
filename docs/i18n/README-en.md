@@ -57,7 +57,7 @@ println!("{}", pet::ASCII);
 //    64-bit distributed unique ID generator
 ```
 
-Four constants are public — `pet::NAME` / `pet::TAGLINE` / `pet::ASCII` / `pet::SVG` — shared by the README, the CLI banner, and downstream admin panels.
+Five public items — `pet::NAME` / `pet::TAGLINE` / `pet::ASCII` / `pet::SVG` and `pet::EXPRESSIONS` (the 12 expression forms, each with a label, an emoji code and its SVG source) — are shared by the README, the CLI banner, and downstream admin panels.
 
 The mascot also fills every **icon slot** in the code: rustdoc's crate logo and the browser-tab favicon both point at it (via `#![doc(html_logo_url / html_favicon_url)]` in `src/lib.rs`), so the snowflake is what you see on the docs.rs page and in the tab; the badge in the top-right corner of all four diagrams below is its miniature. Wherever there is an icon, it is the mascot.
 
@@ -127,7 +127,7 @@ Nine features group into three capability domains:
 |--------|------|
 | **Core** | Unique ID generation (`id()`) · flexible bit allocation (`lifespan_ms()` computes the lifespan up front) · ID parsing (`parse_id()` / `parse()`) |
 | **Extension** | Pluggable sequence resolvers (`SequenceResolver` trait) · clock-drift protection (tolerance window + `wait` / `throw`) · framework integration (8 opt-in features, the `Guard` request guard) |
-| **Engineering** | Strict configuration validation (builder + environment variables, two entry points) · concurrency safety (`&mut self` enforced at compile time, sharing via `Shared` / `Guard`) · quality and delivery (96 tests, a reproducible benchmark, bilingual docs) |
+| **Engineering** | Strict configuration validation (builder + environment variables, two entry points) · concurrency safety (`&mut self` enforced at compile time, sharing via `Shared` / `Guard`) · quality and delivery (97 tests, a reproducible benchmark, bilingual docs) |
 
 ## ID Lifecycle
 

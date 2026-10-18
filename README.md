@@ -57,7 +57,7 @@ println!("{}", pet::ASCII);
 //    64-bit distributed unique ID generator
 ```
 
-`pet::NAME` / `pet::TAGLINE` / `pet::ASCII` / `pet::SVG` 四个常量对外公开，README、CLI banner、下游管理界面共用同一份。
+`pet::NAME` / `pet::TAGLINE` / `pet::ASCII` / `pet::SVG` 与 `pet::EXPRESSIONS`（12 种表情形态，每项带中文名、emoji 短码与 SVG 源码）对外公开，README、CLI banner、下游管理界面共用同一份。
 
 宠物还占据代码里所有的**图标位**：`rustdoc` 的 crate 图标与浏览器标签页 favicon 都指向它（`src/lib.rs` 的 `#![doc(html_logo_url / html_favicon_url)]`），docs.rs 页面上、标签页里看到的都是这片雪花；本文档中的四张设计图，右上角徽章里也是它的迷你版。有图标的地方，就是它。
 
@@ -77,6 +77,8 @@ CLI 自带宠物：不带参数运行 `snowflake-rust` 会打印它并发一个 
 | ![撒娇](docs/pet-expressions/coquettish.svg) | ![卖萌](docs/pet-expressions/cute.svg) | ![讨好](docs/pet-expressions/pleasing.svg) | ![敲打](docs/pet-expressions/knocking.svg) | ![捂脸](docs/pet-expressions/facepalm.svg) | ![吐舌头](docs/pet-expressions/tongue.svg) |
 
 > 12 种彩色动态形态：笑 / 欢乐 / 哭 / 沮丧 / 惊恐 / 愤怒 / 撒娇 / 卖萌 / 讨好 / 敲打 / 捂脸 / 吐舌头。每个 SVG 自带表情、情绪特效与整体动效，并遵循 `prefers-reduced-motion`。
+
+形态也已随代码发布：`pet::EXPRESSIONS` 里每项带中文名、emoji 短码与 SVG 源码。
 
 ## 视觉资产授权 / Visual Assets License
 
@@ -148,7 +150,7 @@ snowflake-rust/
 |--------|------|
 | **核心能力** | 唯一 ID 生成（`id()`）· 弹性位分配（`lifespan_ms()` 先算寿命）· ID 反向解析（`parse_id()` / `parse()`） |
 | **扩展能力** | 可插拔序列策略（`SequenceResolver` trait）· 时钟回拨保护（容忍窗口 + `wait` / `throw`）· 框架集成（8 个 opt-in feature，`Guard` 请求守卫） |
-| **工程保障** | 严格配置校验（构建器 + 环境变量两个入口）· 并发安全（`&mut self` 编译期保证，`Shared` / `Guard` 共享）· 质量与交付（96 项测试、可复现基准、中英双语文档） |
+| **工程保障** | 严格配置校验（构建器 + 环境变量两个入口）· 并发安全（`&mut self` 编译期保证，`Shared` / `Guard` 共享）· 质量与交付（97 项测试、可复现基准、中英双语文档） |
 
 ## ID 生命周期
 

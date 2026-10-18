@@ -100,7 +100,7 @@
 <text x="684.3333333333334" y="596" font-size="13.0" fill="#0f1e33" font-weight="700">Quality &amp; delivery</text>
 <rect x="684.3" y="604.0" width="116.5" height="18.0" rx="9" fill="#fbf9ff"/>
 <text x="742.6073333333334" y="617" font-size="10.5" fill="#6d28d9" font-weight="600" text-anchor="middle">cargo test · bench</text>
-<text x="684.3333333333334" y="638.0" font-size="11.5" fill="#3d4d66" font-weight="400">96 tests (8-thread uniqueness, all</text>
+<text x="684.3333333333334" y="638.0" font-size="11.5" fill="#3d4d66" font-weight="400">97 tests (8-thread uniqueness, all</text>
 <text x="684.3333333333334" y="655.25" font-size="11.5" fill="#3d4d66" font-weight="400">three drift states, a fake Redis client),</text>
 <text x="684.3333333333334" y="672.5" font-size="11.5" fill="#3d4d66" font-weight="400">a reproducible benchmark, bilingual</text>
 <text x="684.3333333333334" y="689.75" font-size="11.5" fill="#3d4d66" font-weight="400">docs and the project mascot.</text>

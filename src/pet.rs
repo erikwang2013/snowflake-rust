@@ -43,6 +43,83 @@ pub const ASCII: &str = r#"                  \       /
 /// 也正因如此 `docs/pet.svg` **不能**进 Cargo 的 `exclude` —— 排掉会当场编译失败。
 pub const SVG: &str = include_str!("../docs/pet.svg");
 
+/// 一种表情形态：中文名、emoji 短码与 SVG 源码。
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct Expression {
+    /// 中文名，如 `笑`。
+    pub label: &'static str,
+    /// emoji 短码，如 `:emoji-smile:`。
+    pub code: &'static str,
+    /// SVG 源码（`docs/pet-expressions/`）。
+    pub svg: &'static str,
+}
+
+/// 雪花精灵的 12 种表情形态，顺序与 README 表格一致。
+///
+/// 与 [`SVG`] 一样用 `include_str!` 内联：README 表格、下游表情选择器共用同一份。
+pub const EXPRESSIONS: [Expression; 12] = [
+    Expression {
+        label: "笑",
+        code: ":emoji-smile:",
+        svg: include_str!("../docs/pet-expressions/smile.svg"),
+    },
+    Expression {
+        label: "欢乐",
+        code: ":emoji-joy:",
+        svg: include_str!("../docs/pet-expressions/joy.svg"),
+    },
+    Expression {
+        label: "哭",
+        code: ":emoji-cry:",
+        svg: include_str!("../docs/pet-expressions/cry.svg"),
+    },
+    Expression {
+        label: "沮丧",
+        code: ":emoji-depressed:",
+        svg: include_str!("../docs/pet-expressions/depressed.svg"),
+    },
+    Expression {
+        label: "惊恐",
+        code: ":emoji-terrified:",
+        svg: include_str!("../docs/pet-expressions/terrified.svg"),
+    },
+    Expression {
+        label: "愤怒",
+        code: ":emoji-angry:",
+        svg: include_str!("../docs/pet-expressions/angry.svg"),
+    },
+    Expression {
+        label: "撒娇",
+        code: ":emoji-coquettish:",
+        svg: include_str!("../docs/pet-expressions/coquettish.svg"),
+    },
+    Expression {
+        label: "卖萌",
+        code: ":emoji-cute:",
+        svg: include_str!("../docs/pet-expressions/cute.svg"),
+    },
+    Expression {
+        label: "讨好",
+        code: ":emoji-pleasing:",
+        svg: include_str!("../docs/pet-expressions/pleasing.svg"),
+    },
+    Expression {
+        label: "敲打",
+        code: ":emoji-knocking:",
+        svg: include_str!("../docs/pet-expressions/knocking.svg"),
+    },
+    Expression {
+        label: "捂脸",
+        code: ":emoji-facepalm:",
+        svg: include_str!("../docs/pet-expressions/facepalm.svg"),
+    },
+    Expression {
+        label: "吐舌头",
+        code: ":emoji-tongue:",
+        svg: include_str!("../docs/pet-expressions/tongue.svg"),
+    },
+];
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -70,5 +147,30 @@ mod tests {
         assert!(!NAME.is_empty() && !TAGLINE.is_empty());
         assert!(ASCII.lines().count() >= 6, "ASCII 形象太短");
         assert!(ASCII.contains("snowflake-rust"));
+    }
+
+    #[test]
+    fn expressions_are_bundled_whole() {
+        assert_eq!(EXPRESSIONS.len(), 12);
+        for e in EXPRESSIONS {
+            assert!(e.svg.starts_with("<svg"), "{} 的 SVG 头部不对", e.label);
+            assert!(
+                e.svg.trim_end().ends_with("</svg>"),
+                "{} 的 SVG 没闭合",
+                e.label
+            );
+            assert!(
+                e.svg.contains(r#"viewBox="0 0 320 340""#),
+                "{} 的 viewBox 变了",
+                e.label
+            );
+            assert!(!e.label.is_empty(), "表情缺中文名");
+            assert!(e.code.starts_with(":emoji-"), "{} 的短码不对", e.label);
+        }
+
+        let mut codes: Vec<_> = EXPRESSIONS.iter().map(|e| e.code).collect();
+        codes.sort_unstable();
+        codes.dedup();
+        assert_eq!(codes.len(), EXPRESSIONS.len(), "emoji 短码有重复");
     }
 }

@@ -114,7 +114,7 @@
   "feat.c8.desc": "id() takes &mut self: sharing an instance across threads does not compile. Share through Shared / Guard — no .await inside the lock.",
   "feat.c8.tag": "Shared · Arc<Mutex<…>>",
   "feat.c9": "Quality & delivery",
-  "feat.c9.desc": "96 tests (8-thread uniqueness, all three drift states, a fake Redis client), a reproducible benchmark, bilingual docs and the project mascot.",
+  "feat.c9.desc": "97 tests (8-thread uniqueness, all three drift states, a fake Redis client), a reproducible benchmark, bilingual docs and the project mascot.",
   "feat.c9.tag": "cargo test · bench",
   "feat.footer": "Requirements: Rust >= 1.88 (edition 2024) · any platform (i64) · one instance state per process; share across threads with Shared / Guard",
   "life.title": "ID Lifecycle",
