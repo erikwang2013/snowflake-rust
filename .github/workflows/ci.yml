@@ -97,7 +97,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       # 打好的包必须自身能编译 —— 这就是 crates.io 上会发生的事；
-      # docs/pet.svg 被 include_str! 在编译期读取，被 exclude 漏发会当场暴露。
+      # docs/pet.svg 与 docs/pet-expressions/ 被 include_str! 在编译期读取，
+      # 被 exclude 漏发会当场暴露。
       - run: cargo publish --dry-run --locked
 
   features:

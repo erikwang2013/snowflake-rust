@@ -61,9 +61,21 @@ Five public items — `pet::NAME` / `pet::TAGLINE` / `pet::ASCII` / `pet::SVG` a
 
 The mascot also fills every **icon slot** in the code: rustdoc's crate logo and the browser-tab favicon both point at it (via `#![doc(html_logo_url / html_favicon_url)]` in `src/lib.rs`), so the snowflake is what you see on the docs.rs page and in the tab; the badge in the top-right corner of all four diagrams below is its miniature. Wherever there is an icon, it is the mascot.
 
-`docs/pet.svg` must **not** go into Cargo's `exclude` — `include_str!` reads it at compile time, and excluding it fails the build outright (`cargo package` reports an error rather than silently shipping a broken crate).
+`docs/pet.svg` and `docs/pet-expressions/` must **not** go into Cargo's `exclude` — `include_str!` reads them at compile time, and excluding them fails the build outright (`cargo package` reports an error rather than silently shipping a broken crate).
 
 The CLI ships with the mascot too: running `snowflake-rust` with no arguments prints it and generates an ID.
+
+## Mascot Expression Forms: the Snowflake Sprite
+
+| Smile `:emoji-smile:` | Joy `:emoji-joy:` | Cry `:emoji-cry:` | Depressed `:emoji-depressed:` | Terrified `:emoji-terrified:` | Angry `:emoji-angry:` |
+|:---:|:---:|:---:|:---:|:---:|:---:|
+| ![Smile](../../docs/pet-expressions/smile.svg) | ![Joy](../../docs/pet-expressions/joy.svg) | ![Cry](../../docs/pet-expressions/cry.svg) | ![Depressed](../../docs/pet-expressions/depressed.svg) | ![Terrified](../../docs/pet-expressions/terrified.svg) | ![Angry](../../docs/pet-expressions/angry.svg) |
+| **Coquettish** `:emoji-coquettish:` | **Cute** `:emoji-cute:` | **Pleasing** `:emoji-pleasing:` | **Knocking** `:emoji-knocking:` | **Facepalm** `:emoji-facepalm:` | **Tongue** `:emoji-tongue:` |
+| ![Coquettish](../../docs/pet-expressions/coquettish.svg) | ![Cute](../../docs/pet-expressions/cute.svg) | ![Pleasing](../../docs/pet-expressions/pleasing.svg) | ![Knocking](../../docs/pet-expressions/knocking.svg) | ![Facepalm](../../docs/pet-expressions/facepalm.svg) | ![Tongue](../../docs/pet-expressions/tongue.svg) |
+
+> 12 colorful animated forms. Every SVG carries its own expression, emotional effects and overall motion, and respects `prefers-reduced-motion`.
+
+The forms ship with the code too: each entry in `pet::EXPRESSIONS` carries a label, an emoji code and its SVG source.
 
 ---
 
@@ -86,7 +98,7 @@ snowflake-rust/
 │   ├── guard.rs               Guard (= the framework-context name for Shared) + host of the Guarded trait
 │   ├── integrations/          axum / actix-web / rocket / poem / salvo / warp / bee-rust / e-cat
 │   │                          (one opt-in feature per framework, none pulled in by default)
-│   ├── pet.rs                 Project mascot (NAME / TAGLINE / ASCII / SVG)
+│   ├── pet.rs                 Project mascot (NAME / TAGLINE / ASCII / SVG / EXPRESSIONS)
 │   └── bin/snowflake.rs       CLI: mascot banner, generate, parse
 ├── examples/
 │   ├── quickstart.rs          Runnable multi-threaded example
@@ -97,6 +109,7 @@ snowflake-rust/
 │   └── i18n/labels.<lang>.json  Per-language diagram labels
 ├── docs/
 │   ├── pet.svg                Project mascot (compiled in with include_str!)
+│   ├── pet-expressions/       12 expression-form SVGs (compiled in too)
 │   ├── i18n/
 │   │   ├── README-en.md       English README
 │   │   └── img/<lang>/        architecture / features / lifecycle / request-cycle diagrams

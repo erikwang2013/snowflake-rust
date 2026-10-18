@@ -61,7 +61,7 @@ println!("{}", pet::ASCII);
 
 宠物还占据代码里所有的**图标位**：`rustdoc` 的 crate 图标与浏览器标签页 favicon 都指向它（`src/lib.rs` 的 `#![doc(html_logo_url / html_favicon_url)]`），docs.rs 页面上、标签页里看到的都是这片雪花；本文档中的四张设计图，右上角徽章里也是它的迷你版。有图标的地方，就是它。
 
-`docs/pet.svg` **不能**进 Cargo 的 `exclude` —— `include_str!` 在编译期读它，排掉就当场编译失败（`cargo package` 会直接报错，不会静默漏发）。
+`docs/pet.svg` 与 `docs/pet-expressions/` **不能**进 Cargo 的 `exclude` —— `include_str!` 在编译期读它们，排掉就当场编译失败（`cargo package` 会直接报错，不会静默漏发）。
 
 CLI 自带宠物：不带参数运行 `snowflake-rust` 会打印它并发一个 ID。
 
@@ -109,7 +109,7 @@ snowflake-rust/
 │   ├── guard.rs               Guard（= Shared 的框架语境名字）+ Guarded trait 宿主
 │   ├── integrations/          axum / actix-web / rocket / poem / salvo / warp / bee-rust / e-cat
 │   │                          （每框架一个 opt-in feature，默认一个都不拉）
-│   ├── pet.rs                 项目宠物（NAME / TAGLINE / ASCII / SVG）
+│   ├── pet.rs                 项目宠物（NAME / TAGLINE / ASCII / SVG / EXPRESSIONS）
 │   └── bin/snowflake.rs       CLI：宠物 banner、发号、反解
 ├── examples/
 │   ├── quickstart.rs          可直接运行的多线程示例
@@ -120,6 +120,7 @@ snowflake-rust/
 │   └── i18n/labels.<lang>.json  各语言的图内文案
 ├── docs/
 │   ├── pet.svg                项目宠物（include_str! 打进库）
+│   ├── pet-expressions/       12 种表情形态 SVG（同样打进库）
 │   ├── i18n/
 │   │   ├── README-en.md       English README
 │   │   └── img/<lang>/        架构 / 功能 / 生命周期 / 请求周期 图
