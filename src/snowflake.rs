@@ -4,7 +4,7 @@
 
 use std::fmt;
 use std::str::FromStr;
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use crate::error::{Error, Result};
 use crate::parse::{ParsedId, parse_with_layout};
@@ -116,9 +116,11 @@ impl Snowflake {
                 timestamp = self.last_timestamp;
             } else if self.clock_drift_strategy == ClockDriftStrategy::Wait {
                 // 骑过回拨而不是失败：等墙钟追平，以等待预算为界，
-                // 严重跑偏的时钟不会把调用方永久卡死。
-                let deadline = Self::current_time_millis().saturating_add(self.clock_drift_wait_ms);
-                timestamp = self.wait_next_millis(self.last_timestamp, Some(deadline))?;
+                // 严重跑偏的时钟不会把调用方永久卡死。预算用单调时钟计：
+                // 墙钟若停住不走，拿墙钟算的截止点永远不会到。
+                let deadline = Instant::now()
+                    .checked_add(Duration::from_millis(self.clock_drift_wait_ms as u64));
+                timestamp = self.wait_next_millis(self.last_timestamp, deadline)?;
             } else {
                 return Err(Error::ClockDrift {
                     last_timestamp_ms: self.last_timestamp,
@@ -254,17 +256,17 @@ impl Snowflake {
 
     /// 睡到墙钟越过 `last_timestamp`。
     ///
-    /// `deadline_ms` 为绝对墙钟毫秒的放弃点：到点仍落后就报
+    /// `deadline` 是单调时钟上的放弃点：到点仍落后就报
     /// [`Error::ClockDrift`] 而不是继续等。`None` 表示一直等到追上。
     ///
     /// 这是 `id()` 里唯一的循环体，正常路径（毫秒没走完）根本到不了这里 ——
     /// `#[cold]` 让它别挤占热路径的指令布局。
     #[cold]
-    fn wait_next_millis(&self, last_timestamp: i64, deadline_ms: Option<i64>) -> Result<i64> {
+    fn wait_next_millis(&self, last_timestamp: i64, deadline: Option<Instant>) -> Result<i64> {
         let mut timestamp = Self::current_time_millis();
         while timestamp <= last_timestamp {
-            if let Some(deadline) = deadline_ms
-                && timestamp >= deadline
+            if let Some(deadline) = deadline
+                && Instant::now() >= deadline
             {
                 return Err(Error::ClockDrift {
                     last_timestamp_ms: last_timestamp,
@@ -369,7 +371,7 @@ impl SnowflakeBuilder {
         self
     }
 
-    /// 自定义起始时间戳（毫秒），默认 [`Snowflake::DEFAULT_EPOCH`]。
+    /// 自定义起始时间戳（毫秒），必须为正，默认 [`Snowflake::DEFAULT_EPOCH`]。
     pub fn epoch(mut self, epoch: i64) -> Self {
         self.epoch = Some(epoch);
         self
@@ -405,7 +407,7 @@ impl SnowflakeBuilder {
         self
     }
 
-    /// 校验配置并构建生成器（固定顺序：位宽布局 → 回拨配置 → 节点 ID）。
+    /// 校验配置并构建生成器（固定顺序：位宽布局 → epoch → 回拨配置 → 节点 ID）。
     pub fn build(self) -> Result<Snowflake> {
         let Self {
             worker_id,
@@ -421,6 +423,13 @@ impl SnowflakeBuilder {
         } = self;
 
         Snowflake::validate_layout(worker_bits, datacenter_bits, sequence_bits)?;
+
+        let epoch = epoch.unwrap_or(Snowflake::DEFAULT_EPOCH);
+        if epoch <= 0 {
+            return Err(Error::InvalidConfig(format!(
+                "Epoch must be a positive integer, got {epoch}."
+            )));
+        }
 
         if clock_tolerance_ms < 0 {
             return Err(Error::InvalidConfig(format!(
@@ -461,7 +470,7 @@ impl SnowflakeBuilder {
             Snowflake::lifespan_ms(worker_bits, datacenter_bits, sequence_bits)?;
 
         Ok(Snowflake {
-            epoch: epoch.unwrap_or(Snowflake::DEFAULT_EPOCH),
+            epoch,
             worker_id,
             datacenter_id,
             sequence_bits,

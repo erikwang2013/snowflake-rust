@@ -49,7 +49,8 @@ pub(crate) fn parse_with_layout(
     let sequence = id & max_sequence;
     let worker_id = (id >> worker_shift) & max_worker_id;
     let datacenter_id = (id >> datacenter_shift) & max_datacenter_id;
-    let timestamp_ms = (id >> timestamp_shift) + epoch;
+    // saturating：极端 epoch（如 i64::MAX）与恶意 ID 相加不该 panic。
+    let timestamp_ms = (id >> timestamp_shift).saturating_add(epoch);
 
     ParsedId {
         timestamp_ms,
@@ -131,5 +132,15 @@ mod tests {
             }
         );
         assert_eq!(parsed.datetime(), "2025-01-09 00:00:00.123");
+    }
+
+    #[test]
+    fn extreme_epoch_does_not_overflow() {
+        // 恶意 ID + 荒谬 epoch：饱和而不是 debug panic。
+        assert_eq!(
+            parse_with_layout(i64::MAX, i64::MAX, 12, 5, 5).timestamp_ms,
+            i64::MAX
+        );
+        assert!(parse_with_layout(i64::MIN, i64::MIN, 12, 5, 5).timestamp_ms < 0);
     }
 }

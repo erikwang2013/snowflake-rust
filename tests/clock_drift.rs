@@ -90,6 +90,19 @@ fn offset_exactly_at_the_maximum_is_accepted() {
 }
 
 #[test]
+fn non_positive_epoch_is_rejected() {
+    for epoch in [0, -1, i64::MIN] {
+        assert!(
+            matches!(
+                SnowflakeBuilder::new().epoch(epoch).build(),
+                Err(Error::InvalidConfig(_))
+            ),
+            "epoch={epoch} 应被拒绝"
+        );
+    }
+}
+
+#[test]
 fn negative_clock_tolerance_is_rejected() {
     assert!(matches!(
         SnowflakeBuilder::new().clock_tolerance_ms(-1).build(),

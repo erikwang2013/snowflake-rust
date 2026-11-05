@@ -5,7 +5,7 @@
 # 故以 `snowflake-id-rust` 发布。库名 [lib] 仍是 `snowflake`，代码里
 # `use snowflake::Snowflake` 不受影响；项目/仓库/CLI 仍叫 snowflake-rust。
 name = "snowflake-id-rust"
-version = "2.1.0"
+version = "2.1.1"
 edition = "2024"
 rust-version = "1.88"
 description = "基于 Twitter Snowflake 算法的分布式唯一 ID 生成器：64 位、k-ordered、全局唯一，纯 std 零依赖"
@@ -51,13 +51,14 @@ path = "src/bin/snowflake.rs"
 # 默认构建一个都不拉。
 
 # ── 框架集成（全部 opt-in）────────────────────────────────────────────────
-# 一律保留各框架的默认 feature：适配层要用的是它们的提取器/守卫核心，
-# 那几块常常挂在默认 feature 上。反正这些依赖只在用户主动开启对应 feature
-# 时才进图，且用户自己的框架依赖本来就会把默认 feature 拉进来（Cargo 取并集），
-# 在这里关掉除了让 `cargo check --features <那一个>` 编译不过之外没有收益。
+# 默认 feature 一般保留：适配层要用的是它们的提取器/守卫核心，那几块常常
+# 挂在默认 feature 上；用户自己的框架依赖也会把默认 feature 并回来。
+# 两个例外：actix-web / rocket 的默认 `http2` 会拉进 h2 0.3，而该版本有
+# 未修复的 RUSTSEC-2026-0258（空 DATA 帧 DoS）；适配层不碰 HTTP/2，关掉即可。
+# actix 的 `macros` 只为本 crate 的测试提供 `#[actix_web::test]`。
 axum = { version = "0.8", optional = true }
-actix-web = { version = "4", optional = true }
-rocket = { version = "0.5", optional = true }
+actix-web = { version = "4", optional = true, default-features = false, features = ["macros"] }
+rocket = { version = "0.5", optional = true, default-features = false }
 poem = { version = "3", optional = true }
 salvo = { version = "1", optional = true }
 warp = { version = "0.4", optional = true }

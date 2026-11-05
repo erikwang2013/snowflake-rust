@@ -76,6 +76,20 @@ fn wait_strategy_gives_up_after_its_budget() {
 }
 
 #[test]
+fn wait_deadline_is_checked_against_the_monotonic_clock() {
+    let s = Snowflake::default();
+    let started = Instant::now();
+
+    // last_timestamp 远在未来、截止点已过：必须立刻放弃，而不是一直自旋。
+    let err = s
+        .wait_next_millis(i64::MAX, Some(Instant::now()))
+        .unwrap_err();
+
+    assert!(matches!(err, Error::ClockDrift { .. }));
+    assert!(started.elapsed() < Duration::from_millis(500));
+}
+
+#[test]
 fn wait_strategy_rides_out_a_small_drift() {
     let mut s = SnowflakeBuilder::new()
         .clock_drift_strategy(ClockDriftStrategy::Wait)
@@ -138,8 +152,8 @@ fn always_exhausted_resolver_surfaces_sequence_unavailable() {
 
 #[test]
 fn huge_wait_budget_saturates_instead_of_overflowing() {
-    // i64::MAX 的等待预算 + debug 构建：修复前 deadline 的加法在这里会 panic
-    // （release 下回绕成负值、立刻放弃等待）。saturating_add 后语义 = 一直等到追平。
+    // i64::MAX 的等待预算：checked_add 溢出时等价于「没有截止点」，
+    // 语义 = 一直等到追平，而不是 panic 或立刻放弃。
     let mut s = SnowflakeBuilder::new()
         .clock_drift_strategy(ClockDriftStrategy::Wait)
         .clock_drift_wait_ms(i64::MAX)

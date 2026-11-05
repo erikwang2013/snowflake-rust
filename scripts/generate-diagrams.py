@@ -32,14 +32,11 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LABEL_DIR = os.path.join(ROOT, "scripts", "i18n")
 OUT_DIR = os.path.join(ROOT, "docs", "i18n", "img")
 
-FONT = ("-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', "
-        "'PingFang SC', 'Hiragino Sans', 'Yu Gothic', 'Malgun Gothic', "
-        "Roboto, 'Noto Sans CJK SC', 'Source Han Sans SC', 'Microsoft YaHei', "
-        "'Kohinoor Devanagari', 'Devanagari Sangam MN', 'Nirmala UI', "
-        "'Noto Sans Devanagari', 'Bangla MN', 'Bangla Sangam MN', 'Noto Sans Bengali', "
-        "'Geeza Pro', 'Noto Sans Arabic', Arial, sans-serif")
-MONO = ("'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, "
-        "'Courier New', monospace")
+# Open-source fonts only: Noto / Source Han (SIL OFL), DejaVu (public domain).
+FONT = ("'Noto Sans', 'Noto Sans CJK SC', 'Source Han Sans SC', "
+        "'Noto Sans Devanagari', 'Noto Sans Bengali', 'Noto Sans Arabic', "
+        "'DejaVu Sans', sans-serif")
+MONO = "'Noto Sans Mono', 'DejaVu Sans Mono', 'Liberation Mono', monospace"
 
 INK   = "#0f1e33"; BODY = "#3d4d66"; MUTED = "#6b7c96"; FAINT = "#93a3b8"
 LINE  = "#dbe6f5"; RULE = "#e8eefa"
@@ -660,7 +657,7 @@ def social_preview():
     body.append(text(X + 2, 346, "pure std · zero-dependency core · no async runtime", 21, MUTED))
 
     chips = [("纯 std · 零依赖", GREEN, GREEN_T), ("8 框架集成", VIOLET, VIOLET_T),
-             ("97 项测试", CYAN, CYAN_T), ("4.1M ID/s", AMBER, AMBER_T)]
+             ("100 项测试", CYAN, CYAN_T), ("4.1M ID/s", AMBER, AMBER_T)]
     cx = X
     for label, color, tint in chips:
         w = tw(label, 16, "600") + 34

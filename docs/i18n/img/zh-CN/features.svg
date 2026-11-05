@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 866" width="980" height="866" role="img" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', 'PingFang SC', 'Hiragino Sans', 'Yu Gothic', 'Malgun Gothic', Roboto, 'Noto Sans CJK SC', 'Source Han Sans SC', 'Microsoft YaHei', 'Kohinoor Devanagari', 'Devanagari Sangam MN', 'Nirmala UI', 'Noto Sans Devanagari', 'Bangla MN', 'Bangla Sangam MN', 'Noto Sans Bengali', 'Geeza Pro', 'Noto Sans Arabic', Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 866" width="980" height="866" role="img" font-family="'Noto Sans', 'Noto Sans CJK SC', 'Source Han Sans SC', 'Noto Sans Devanagari', 'Noto Sans Bengali', 'Noto Sans Arabic', 'DejaVu Sans', sans-serif">
 <title>功能设计</title>
 <desc>三大能力域，九项核心功能</desc>
 <defs>
@@ -87,9 +87,9 @@
 <text x="684.3333333333334" y="596" font-size="13.0" fill="#0f1e33" font-weight="700">质量与交付</text>
 <rect x="684.3" y="604.0" width="116.5" height="18.0" rx="9" fill="#fbf9ff"/>
 <text x="742.6073333333334" y="617" font-size="10.5" fill="#6d28d9" font-weight="600" text-anchor="middle">cargo test · bench</text>
-<text x="684.3333333333334" y="638.0" font-size="11.5" fill="#3d4d66" font-weight="400">97 项测试（8 线程并发唯一性、回拨三态</text>
-<text x="684.3333333333334" y="655.25" font-size="11.5" fill="#3d4d66" font-weight="400">、Redis 假客户端）、可复现基准、中英双</text>
-<text x="684.3333333333334" y="672.5" font-size="11.5" fill="#3d4d66" font-weight="400">语文档与项目宠物。</text>
+<text x="684.3333333333334" y="638.0" font-size="11.5" fill="#3d4d66" font-weight="400">100 项测试（8 线程并发唯一性、回拨三</text>
+<text x="684.3333333333334" y="655.25" font-size="11.5" fill="#3d4d66" font-weight="400">态、Redis 假客户端）、可复现基准、中英</text>
+<text x="684.3333333333334" y="672.5" font-size="11.5" fill="#3d4d66" font-weight="400">双语文档与项目宠物。</text>
 <text x="40" y="796" font-size="11.5" fill="#6b7c96" font-weight="400">运行环境：Rust &gt;= 1.88（edition 2024） · 任意平台（i64） · 每进程一份实例状态，跨线程共享请用 Shared / Guard</text>
 <text x="40" y="848" font-size="11.5" fill="#93a3b8" font-weight="400">© 2026 erik — https://erik.xyz</text><text x="940" y="848" font-size="11.5" fill="#93a3b8" font-weight="600" text-anchor="end">snowflake-rust</text>
 </svg>

@@ -140,7 +140,7 @@ Nine features group into three capability domains:
 |--------|------|
 | **Core** | Unique ID generation (`id()`) · flexible bit allocation (`lifespan_ms()` computes the lifespan up front) · ID parsing (`parse_id()` / `parse()`) |
 | **Extension** | Pluggable sequence resolvers (`SequenceResolver` trait) · clock-drift protection (tolerance window + `wait` / `throw`) · framework integration (8 opt-in features, the `Guard` request guard) |
-| **Engineering** | Strict configuration validation (builder + environment variables, two entry points) · concurrency safety (`&mut self` enforced at compile time, sharing via `Shared` / `Guard`) · quality and delivery (97 tests, a reproducible benchmark, bilingual docs) |
+| **Engineering** | Strict configuration validation (builder + environment variables, two entry points) · concurrency safety (`&mut self` enforced at compile time, sharing via `Shared` / `Guard`) · quality and delivery (100 tests, a reproducible benchmark, bilingual docs) |
 
 ## ID Lifecycle
 
